@@ -13,6 +13,7 @@ htmlcov/
 # Private configuration, credentials and local execution data
 config/trader.json
 config/position-recovery.json
+config/multistrategy.json
 logs/
 data/
 .agents/

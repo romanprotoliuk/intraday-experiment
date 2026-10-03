@@ -88,7 +88,8 @@ async def run(root,once=False):
     with process_lock(r/'process.lock'):
         ledger=Ledger(r/'persistent.sqlite3')
         if (r/'PERSISTENT').exists():apply(root,ledger,datetime.now(UTC))
-        engine=Coordinator(root,ledger,recovery_policy=load_policy(root));engine.ledger.recover(engine.now());attempt=0
+        from ..multistrategy.integration import make_coordinator
+        engine=make_coordinator(root,ledger,recovery_policy=load_policy(root));engine.ledger.recover(engine.now());attempt=0
         config=engine.config;cc=config['connectivity'];wd=config['watchdog']
         async def pause(seconds,state):
             if wd['heartbeat_interval_seconds']==5:await pause_monitor(stop,r,seconds,state)

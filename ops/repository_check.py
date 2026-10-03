@@ -64,7 +64,7 @@ def audit(root=ROOT,staged=False):
         findings.extend(scan_content(name,content))
     # Guard commonly forgotten artifacts independently of pattern scans.
     for name in publish:
-        if name.endswith(('.sqlite3','.db','.csv','.jsonl','.log')) or name in ('config/trader.json','config/position-recovery.json','live-session.json') or name.split('/')[0] in ('runtime','reports','research','logs','.venv'):
+        if name.endswith(('.sqlite3','.db','.csv','.jsonl','.log')) or name in ('config/trader.json','config/position-recovery.json','config/multistrategy.json','live-session.json') or name.split('/')[0] in ('runtime','reports','research','logs','.venv'):
             findings.append({'path':name,'category':'private_artifact_not_ignored'})
     return {'publishable_file_count':len(publish),'ignored_file_count':len(ignored- {''}),'scope':'index_blobs' if staged else 'working_tree','findings':findings,'passed':not findings,'note':'No secret values printed. Not a Git-history scan; review staged content before publishing.'}
 

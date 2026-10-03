@@ -16,10 +16,12 @@ def proposal(settings,session,candidate,quote,power,now,capital_available=None,r
                              dict(gross_losses=session['gross_losses'],latched=session['loss_latched']),now,cfg)
     dollars=down(notional,'0.01')
     planned=dollars/entry*(entry-D(candidate['invalidation'])+entry*cfg.slip_bps/10000)+2*cfg.fee_buffer
-    return dict(symbol=candidate['symbol'],setup_id=candidate['setup_id'],notional=str(dollars),quantity_estimate=str(qty),
+    result=dict(symbol=candidate['symbol'],setup_id=candidate['setup_id'],notional=str(dollars),quantity_estimate=str(qty),
                 entry=str(entry),stop=candidate['invalidation'],target=candidate['target'],planned_risk=str(planned),reward_risk=str(cfg.target_r),target_r=str(cfg.target_r),max_hold_minutes=cfg.max_hold_minutes,vwap_exit=cfg.vwap_exit)
+    if candidate.get('signal'):result['strategy_signal']=candidate['signal']
+    return result
 
-def check_reservation(ledger,settings,session,trades,orders,proposal,now,health_check,excluding=None):
+def check_reservation(ledger,settings,session,trades,orders,proposal,now,health_check,excluding=None,candidate_config=None):
     from ..configuration import applied,market_config
     cfg=market_config(applied(ledger))
     health_check(now)
@@ -54,6 +56,7 @@ def check_reservation(ledger,settings,session,trades,orders,proposal,now,health_
     if available<(D(0) if excluding else n+cfg.fee_buffer):raise Unsafe('Unleveraged buying power / $20 reserve')
     c=obs['candidates'].get(sym,{})
     if c.get('state')!='ARMED' or c.get('setup_id')!=proposal['setup_id']:raise Unsafe('No current unexpired ORB signal')
+    if candidate_config:cfg=candidate_config(c)
     fresh=globals()['proposal'](settings,session,c,obs['quotes'][sym],D(obs['power']),now,cfg=cfg)
     if n>D(fresh['notional']):raise Unsafe('Entry sizing/price changed since reservation')
     entry=D(fresh['entry'])

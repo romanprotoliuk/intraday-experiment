@@ -25,6 +25,7 @@ class Coordinator:
         self.monotonic=monotonic_clock or time.monotonic
 
     def session(self):return self.calendar.session(self.now())
+    def candidate_config(self,candidate):return self.cfg
     def health_check(self,now,entry=True):
         settings=self.ledger.settings();session=self.calendar.session(now)
         if entry and self.ledger.get('production_config'):
@@ -205,7 +206,7 @@ class Coordinator:
         reconcile_owned(self.ledger,obs['snapshot'],self.account,now,self.cfg)
         if o['side']=='buy':
             session=self.ledger.ensure_session(t['day'])
-            check_reservation(self.ledger,self.ledger.settings(),session,self.ledger.trades(),self.ledger.orders(),o['data'],now,self.health_check,excluding=oid)
+            check_reservation(self.ledger,self.ledger.settings(),session,self.ledger.trades(),self.ledger.orders(),o['data'],now,self.health_check,excluding=oid,candidate_config=self.candidate_config)
         else:
             if t['status']!='OPEN' or D(o['data']['quantity'])!=D(t['quantity']):raise Unsafe('Exit quantity/ownership changed')
             if any(x['trade_id']==t['id'] and x['id']!=oid for x in self.ledger.orders()):raise Unsafe('Another order owns this position')
@@ -432,9 +433,9 @@ class Coordinator:
                 cumulative_net=sum((D(json.loads(r[0])['net']) for r in self.ledger.db.execute('SELECT data FROM sessions')),D(0))
                 available=max(D(0),D(settings.max_total_exposure)+min(D(0),cumulative_net)-current-reserved)
                 available_risk=max(D(0),D(daily['loss_budget'])-D(daily['gross_losses'])-allocated_risk)
-                proposed=proposal(settings,daily,c,obs['quotes'][symbol],D(obs['power'])-reserved,now,available,available_risk,cfg=self.cfg)
+                proposed=proposal(settings,daily,c,obs['quotes'][symbol],D(obs['power'])-reserved,now,available,available_risk,cfg=self.candidate_config(c))
                 record.update(entry=proposed['entry'],stop=proposed['stop'],target=proposed['target'],planned_risk=proposed['planned_risk'],reward_risk=proposed['reward_risk'],capital=proposed['notional'])
-                def check(s,d,t,o):check_reservation(self.ledger,s,d,t,o,proposed,self.now(),self.health_check)
+                def check(s,d,t,o):check_reservation(self.ledger,s,d,t,o,proposed,self.now(),self.health_check,candidate_config=self.candidate_config)
                 oid=self.ledger.reserve(session.day,symbol,'entry:'+c['setup_id'],proposed,self.now(),check)
                 record.update(risk_engine_result='RESERVED',order_intent=oid,final_reason='Passed deterministic reservation risk checks')
                 self.ledger.event(now,'CANDIDATE_ANALYSIS',record)

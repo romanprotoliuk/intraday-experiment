@@ -137,6 +137,9 @@ class Ledger:
                        config_fingerprint=self.get('config_fingerprint','legacy-unversioned'),strategy_fingerprint=self.get('strategy_fingerprint','legacy-unversioned'),
                        config_snapshot=__import__('trader.configuration',fromlist=['public']).public(self.get('production_config') or {}),
                        target_r=proposal.get('target_r','2'),max_hold_minutes=proposal.get('max_hold_minutes',30),vwap_exit=proposal.get('vwap_exit',True))
+            if proposal.get('strategy_signal'):
+                trade['strategy_signal']=proposal['strategy_signal']
+                trade['strategy_fingerprint']=proposal['strategy_signal']['fingerprint']
             data=dict(proposal,symbol=symbol,checked_at=iso(now),filled_cost='0',filled_quantity='0')
             self.db.execute('INSERT INTO trades VALUES(?,?,?,?,?)',(tid,symbol,day,'OPEN',json.dumps(trade)))
             self.db.execute('INSERT INTO orders VALUES(?,?,?,?,?,?,?)',(oid,key,tid,'buy','RESERVED',None,json.dumps(data)))
