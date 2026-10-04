@@ -19,7 +19,7 @@
     "positive_stress_test_expectancy": true,
     "positive_day_block_bootstrap_lower_bound": true,
     "family_alpha": 0.05,
-    "hypotheses": 70,
+    "hypotheses": 100,
     "bootstrap_replicates": 5000,
     "bootstrap_seed": 20261003,
     "minimum_trade_days_for_interval": 20,
@@ -33,7 +33,7 @@
     "live_feature_parity_required": true,
     "shadow_execution_evidence_required": true,
     "operator_live_enable_required": true,
-    "multiplicity_note": "Bonferroni budget 70 covers 14 base hypotheses and declared variants/exits. Exploratory features are not confirmatory tests."
+    "multiplicity_note": "Conservative 100-hypothesis budget covers 14 bases, 42 exit alternatives, seven old-family variants and 14 new threshold alternatives. Exploratory feature associations are not gate evidence."
   },
   "risk": {
     "capital_per_trade": 10,
@@ -111,5 +111,6 @@
   "orb_decomposition": "Fixed economic bins plus train-only terciles. Chronological group associations are descriptive; no selected filter from replication-period correlations.",
   "portfolio": "Aligned daily returns including zeros, drawdown correlation and setup-time overlap. Undefined correlations remain null. Independently funded simulations are not a shared portfolio.",
   "shadow": "Only quantitative gate passing strategies eligible; no automatically created config, service restart or broker mutation.",
-  "live": "Independent untouched evidence, live feature/execution parity and prospective shadow evidence mandatory. No live enablement during research."
+  "live": "Independent untouched evidence, live feature/execution parity and prospective shadow evidence mandatory. No live enablement during research.",
+  "rule_freeze": "Exact implementation frozen by source digest and strategy fingerprints before computing phase-two returns; see trader/research2/hypotheses.py and docs/PHASE2_RULES.md."
 }
