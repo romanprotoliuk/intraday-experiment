@@ -1,0 +1,53 @@
+{
+  "research_version": "0.3",
+  "release_tag": "v0.3-research-phase2",
+  "provenance": {
+    "parent_commit": "d923d578490e430b22b8c53f25807a3e4c4c2150",
+    "source_digest": "de109686c339715d77cc7be143f2c8c081618fb40f2e3acbc27550fadbe65788",
+    "protocol_digest": "5ce64d781aeb24ca97ce82e883cf1d157b6aedc1437dd73401a423f896751548",
+    "run_id": "phase2-de109686c339"
+  },
+  "run_source_files": {
+    "__init__.py": "cd9ab78437dbc7f92119a1a72e4b7238ef345c5918a55cb542a0e4250f844d11",
+    "analysis.py": "839ec1fb4b3ef1689dbb82bfb7d2ae082cb9c6ad5064451b6394f43167fdf155",
+    "features.py": "34781ef19b866d8b80d54c1943e33b35b5aa3520458fbad3241f56c1ea09e0cd",
+    "hypotheses.py": "22b0966cb029daa4bd9b8ada2ec38cf75bd1c19908fbe7587f96d3b229662ae7",
+    "recent.py": "0686cad0e3ec68c82cd915a444c3dc0a49f187145953c201f72d4b8b802a6223",
+    "regimes.py": "b79e04e4e9fa44505af4124dba5772b29f9e50f2e68e39de82137901514b0043",
+    "replay.py": "fc76dce643d8f841cc015e682132174fbd0963571621314eca09b06e27dc34e7",
+    "study.py": "76768079bae66e2b508d0e7dcbe5bb1de3097e300e3a7b62980a98d01af035f8"
+  },
+  "python": "3.14.2",
+  "dependencies": {
+    "numpy": "2.5.3",
+    "pytest": "9.1.1",
+    "pandas": "3.0.6",
+    "pandas-market-calendars": "5.4.0",
+    "httpx": "0.28.1",
+    "mcp": "1.30.0"
+  },
+  "strategy_fingerprints": {
+    "orb": "b79645cdfd1cbc51887ca1c2d7c49011061c3f73a20ef5a9a794175e8b7720cd",
+    "filtered_orb": "da71bde5a49ab20e5af8914d92c5702c33dfe6da944d5ea96c125e3b7c519396",
+    "orb_retest": "5ccca0ace2d91dc7b4d6fcfc97fbf8e6648cb092c06a2db86ad4d4d27a11e5c0",
+    "vwap_trend": "26ddca9708c415a471e9e5c76ecc6d84b81876a4f1db41304d7aa0728365ebf4",
+    "vwap_reversion": "8794ae8454cd28e8c375f44cae56615ff982e639d2ff7a337e69b6cb90f97fa8",
+    "gap_continuation": "2e90d6794d8a23ada42195e3d3c92d51654731726371fa38ced280061ed8db32",
+    "gap_fade": "9d8b44db654d2b431181d05786c4c8c1b03319682ff82586b382f546c0385784",
+    "opening_drive": "fc1d5e98dfeacf353bb41316a019d908359e1bef08308464a6a10e52ee2850e8",
+    "failed_breakout": "6c088dbf3d2b96a74637d47862fb5181dd55d6f01a28ab8dd0a1d99c36b8525d",
+    "vwap_reclaim": "2d01f74c45eef1fedf962cb40f6629fc063e91ddc7c9533496541822997f1d05",
+    "trend_pullback": "24c04ad074b1c63749755dcc6f39a0514edf7387928a68361df9f0465ea0b95a",
+    "range_breakout": "3508d89ce83c2ed3c482058e20ced6b10fc7f3057c130de78e6ed08980940503",
+    "momentum_continuation": "47aa1f7a69b294b0f150d87a898607645aee500dee2c11442b56a1d2e9234744",
+    "exhaustion_reversion": "e969ea9dd5af7c5a847b74a8782411ad3315e38449378cdaca9189518e018be3"
+  },
+  "baseline_tests": 677,
+  "new_tests": 38,
+  "total_tests": 715,
+  "new_live_enabled": false,
+  "new_shadow_eligible": [],
+  "new_live_eligible": [],
+  "protocol_sha256": "5ce64d781aeb24ca97ce82e883cf1d157b6aedc1437dd73401a423f896751548",
+  "source_scope": "Offline research; no statement about deployed worker code version"
+}

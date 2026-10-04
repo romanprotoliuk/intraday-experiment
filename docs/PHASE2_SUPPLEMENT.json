@@ -1,0 +1,2671 @@
+{
+  "orb_event_breakdowns": {
+    "LONG": {
+      "train": {
+        "all": {
+          "summary": {
+            "events": 405,
+            "active_days": 98,
+            "5": {
+              "count": 405,
+              "gross_bps": 1.0538567707969433,
+              "net_bps": -1.9463013077186768
+            },
+            "15": {
+              "count": 405,
+              "gross_bps": 0.4894783432990092,
+              "net_bps": -2.510595078452552
+            },
+            "30": {
+              "count": 405,
+              "gross_bps": 2.365662335229855,
+              "net_bps": -0.6346925141204546
+            }
+          },
+          "net_30m_interval": {
+            "lower": -4.499026293995722,
+            "upper": 3.268974582991406,
+            "active_days": 98,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 202,
+              "active_days": 92,
+              "5": {
+                "count": 202,
+                "gross_bps": 0.12986767354127196,
+                "net_bps": -2.8701518066096976
+              },
+              "15": {
+                "count": 202,
+                "gross_bps": 0.3195036812793139,
+                "net_bps": -2.6805442442729297
+              },
+              "30": {
+                "count": 202,
+                "gross_bps": 2.3406770091963978,
+                "net_bps": -0.6596740923549859
+              }
+            },
+            "net_30m_interval": {
+              "lower": -4.731911173881285,
+              "upper": 3.745788008340651,
+              "active_days": 92,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 203,
+              "active_days": 89,
+              "5": {
+                "count": 203,
+                "gross_bps": 1.9732941976227836,
+                "net_bps": -1.027001796506922
+              },
+              "15": {
+                "count": 203,
+                "gross_bps": 0.6586156917126962,
+                "net_bps": -2.3414831006411414
+              },
+              "30": {
+                "count": 203,
+                "gross_bps": 2.390524580839502,
+                "net_bps": -0.6098339978476699
+              }
+            },
+            "net_30m_interval": {
+              "lower": -5.579538806649173,
+              "upper": 4.428024675382161,
+              "active_days": 89,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 181,
+            "active_days": 98,
+            "5": {
+              "count": 181,
+              "gross_bps": -0.10556144335023791,
+              "net_bps": -3.105545609133671
+            },
+            "15": {
+              "count": 181,
+              "gross_bps": -2.358351994152036,
+              "net_bps": -5.357998241352944
+            },
+            "30": {
+              "count": 181,
+              "gross_bps": 1.4433333770768182,
+              "net_bps": -1.5568831229297442
+            }
+          },
+          "net_30m_interval": {
+            "lower": -7.285037941176008,
+            "upper": 4.4747127764497,
+            "active_days": 98,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 224,
+            "active_days": 66,
+            "5": {
+              "count": 224,
+              "gross_bps": 1.990708095621228,
+              "net_bps": -1.0095905105931682
+            },
+            "15": {
+              "count": 224,
+              "gross_bps": 2.7906269641857913,
+              "net_bps": -0.20979162985893107
+            },
+            "30": {
+              "count": 224,
+              "gross_bps": 3.1109370737374427,
+              "net_bps": 0.11047043317633733
+            }
+          },
+          "net_30m_interval": {
+            "lower": -5.067341324353383,
+            "upper": 5.737786009951116,
+            "active_days": 66,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      },
+      "validation": {
+        "all": {
+          "summary": {
+            "events": 195,
+            "active_days": 49,
+            "5": {
+              "count": 195,
+              "gross_bps": 0.7103505463714971,
+              "net_bps": -2.2897560062105113
+            },
+            "15": {
+              "count": 195,
+              "gross_bps": 0.7881536744980551,
+              "net_bps": -2.2119645485531696
+            },
+            "30": {
+              "count": 195,
+              "gross_bps": 2.146139295578768,
+              "net_bps": -0.8541826253154887
+            }
+          },
+          "net_30m_interval": {
+            "lower": -3.868055897055576,
+            "upper": 2.3043305979704667,
+            "active_days": 49,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 98,
+              "active_days": 41,
+              "5": {
+                "count": 98,
+                "gross_bps": 0.3796404506658569,
+                "net_bps": -2.6204164954018037
+              },
+              "15": {
+                "count": 98,
+                "gross_bps": 1.542833167552331,
+                "net_bps": -1.4573982574228113
+              },
+              "30": {
+                "count": 98,
+                "gross_bps": 2.360578866479765,
+                "net_bps": -0.6397752203501473
+              }
+            },
+            "net_30m_interval": {
+              "lower": -4.382143074315723,
+              "upper": 2.931459529130894,
+              "active_days": 41,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 97,
+              "active_days": 44,
+              "5": {
+                "count": 97,
+                "gross_bps": 1.0444700245070924,
+                "net_bps": -1.9556866459966282
+              },
+              "15": {
+                "count": 97,
+                "gross_bps": 0.025693980484456647,
+                "net_bps": -2.974309873612707
+              },
+              "30": {
+                "count": 97,
+                "gross_bps": 1.9294890074519873,
+                "net_bps": -1.0708004158990294
+              }
+            },
+            "net_30m_interval": {
+              "lower": -5.500054539502199,
+              "upper": 3.5754594704182487,
+              "active_days": 44,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 85,
+            "active_days": 49,
+            "5": {
+              "count": 85,
+              "gross_bps": 0.36625311777382275,
+              "net_bps": -2.6338018201938396
+            },
+            "15": {
+              "count": 85,
+              "gross_bps": -0.03186283524253221,
+              "net_bps": -3.031858055817335
+            },
+            "30": {
+              "count": 85,
+              "gross_bps": 3.9010591626249145,
+              "net_bps": 0.9004740037506123
+            }
+          },
+          "net_30m_interval": {
+            "lower": -4.478095235785618,
+            "upper": 5.684699083762921,
+            "active_days": 49,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 110,
+            "active_days": 33,
+            "5": {
+              "count": 110,
+              "gross_bps": 0.9762440139242454,
+              "net_bps": -2.0239024226779394
+            },
+            "15": {
+              "count": 110,
+              "gross_bps": 1.4218027956612362,
+              "net_bps": -1.5784104747581327
+            },
+            "30": {
+              "count": 110,
+              "gross_bps": 0.790064852861291,
+              "net_bps": -2.2100536568665667
+            }
+          },
+          "net_30m_interval": {
+            "lower": -6.231379156832523,
+            "upper": 1.7340736990857604,
+            "active_days": 33,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      },
+      "replication_test": {
+        "all": {
+          "summary": {
+            "events": 231,
+            "active_days": 45,
+            "5": {
+              "count": 231,
+              "gross_bps": -0.7522492030841437,
+              "net_bps": -3.7521363657036506
+            },
+            "15": {
+              "count": 231,
+              "gross_bps": 0.3331841230050094,
+              "net_bps": -2.6668658546134747
+            },
+            "30": {
+              "count": 231,
+              "gross_bps": -0.8437034902056334,
+              "net_bps": -3.8435769346821567
+            }
+          },
+          "net_30m_interval": {
+            "lower": -6.6790522039797695,
+            "upper": -0.8834215177930248,
+            "active_days": 45,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 122,
+              "active_days": 42,
+              "5": {
+                "count": 122,
+                "gross_bps": -0.8544015545499898,
+                "net_bps": -3.854273394316792
+              },
+              "15": {
+                "count": 122,
+                "gross_bps": -0.24769695856093227,
+                "net_bps": -3.247659804017181
+              },
+              "30": {
+                "count": 122,
+                "gross_bps": -1.081708507471443,
+                "net_bps": -4.081546251195382
+              }
+            },
+            "net_30m_interval": {
+              "lower": -6.269388841978848,
+              "upper": -1.6447523580623868,
+              "active_days": 42,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 109,
+              "active_days": 41,
+              "5": {
+                "count": 109,
+                "gross_bps": -0.6379135436453068,
+                "net_bps": -3.637817856613712
+              },
+              "15": {
+                "count": 109,
+                "gross_bps": 0.9833445996201,
+                "net_bps": -2.0168029020698772
+              },
+              "30": {
+                "count": 109,
+                "gross_bps": -0.5773125534494062,
+                "net_bps": -3.5772259565664366
+              }
+            },
+            "net_30m_interval": {
+              "lower": -7.651389372503719,
+              "upper": 0.5703478636067462,
+              "active_days": 41,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 83,
+            "active_days": 45,
+            "5": {
+              "count": 83,
+              "gross_bps": -1.4437747200843176,
+              "net_bps": -4.443558153876262
+            },
+            "15": {
+              "count": 83,
+              "gross_bps": 0.9749684397387084,
+              "net_bps": -2.025177805527306
+            },
+            "30": {
+              "count": 83,
+              "gross_bps": -3.6249344744544403,
+              "net_bps": -6.624390734283353
+            }
+          },
+          "net_30m_interval": {
+            "lower": -11.778310240968851,
+            "upper": -1.5840324324615298,
+            "active_days": 45,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 148,
+            "active_days": 40,
+            "5": {
+              "count": 148,
+              "gross_bps": -0.36443421719891106,
+              "net_bps": -3.3643795520663073
+            },
+            "15": {
+              "count": 148,
+              "gross_bps": -0.02673546002807861,
+              "net_bps": -3.0267314497090965
+            },
+            "30": {
+              "count": 148,
+              "gross_bps": 0.7160409131230895,
+              "net_bps": -2.2840664930139183
+            }
+          },
+          "net_30m_interval": {
+            "lower": -6.203059015110263,
+            "upper": 2.0023385157294467,
+            "active_days": 40,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      }
+    },
+    "SHORT_DIAGNOSTIC_ONLY": {
+      "train": {
+        "all": {
+          "summary": {
+            "events": 392,
+            "active_days": 85,
+            "5": {
+              "count": 392,
+              "gross_bps": 0.31820356692640706,
+              "net_bps": -2.6817487025385747
+            },
+            "15": {
+              "count": 392,
+              "gross_bps": -0.014331248284142796,
+              "net_bps": -3.014333397971359
+            },
+            "30": {
+              "count": 392,
+              "gross_bps": -1.0849492339450522,
+              "net_bps": -4.085111976330152
+            }
+          },
+          "net_30m_interval": {
+            "lower": -9.653169735782589,
+            "upper": 1.3066159887792725,
+            "active_days": 85,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 201,
+              "active_days": 83,
+              "5": {
+                "count": 201,
+                "gross_bps": 0.8516479525934862,
+                "net_bps": -2.1482243002136463
+              },
+              "15": {
+                "count": 201,
+                "gross_bps": -0.531115046021631,
+                "net_bps": -3.5311947132785075
+              },
+              "30": {
+                "count": 201,
+                "gross_bps": -0.24903981865427116,
+                "net_bps": -3.2490771746270832
+              }
+            },
+            "net_30m_interval": {
+              "lower": -9.650044431155768,
+              "upper": 2.943835633455238,
+              "active_days": 83,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 191,
+              "active_days": 78,
+              "5": {
+                "count": 191,
+                "gross_bps": -0.2431698441682679,
+                "net_bps": -3.2432063196449135
+              },
+              "15": {
+                "count": 191,
+                "gross_bps": 0.5295092927903866,
+                "net_bps": -2.470411280815669
+              },
+              "30": {
+                "count": 191,
+                "gross_bps": -1.9646235400887537,
+                "net_bps": -4.96491823361977
+              }
+            },
+            "net_30m_interval": {
+              "lower": -11.198654738575858,
+              "upper": 1.0923362431270685,
+              "active_days": 78,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 161,
+            "active_days": 85,
+            "5": {
+              "count": 161,
+              "gross_bps": 2.682216575344277,
+              "net_bps": -0.3173810921694687
+            },
+            "15": {
+              "count": 161,
+              "gross_bps": 2.0462908256368224,
+              "net_bps": -0.9534022307393006
+            },
+            "30": {
+              "count": 161,
+              "gross_bps": -2.3551082463915947,
+              "net_bps": -5.355461512628581
+            }
+          },
+          "net_30m_interval": {
+            "lower": -15.788847451010657,
+            "upper": 5.053937018530621,
+            "active_days": 85,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 231,
+            "active_days": 67,
+            "5": {
+              "count": 231,
+              "gross_bps": -1.3294418631830174,
+              "net_bps": -4.329641279462497
+            },
+            "15": {
+              "count": 231,
+              "gross_bps": -1.4505223907139064,
+              "net_bps": -4.450739969072491
+            },
+            "30": {
+              "count": 231,
+              "gross_bps": -0.19968689193685607,
+              "net_bps": -3.199716844970641
+            }
+          },
+          "net_30m_interval": {
+            "lower": -8.491581509594358,
+            "upper": 1.1196629546718873,
+            "active_days": 67,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      },
+      "validation": {
+        "all": {
+          "summary": {
+            "events": 188,
+            "active_days": 45,
+            "5": {
+              "count": 188,
+              "gross_bps": 0.8880282384690925,
+              "net_bps": -2.111838557295177
+            },
+            "15": {
+              "count": 188,
+              "gross_bps": -0.7382177647415913,
+              "net_bps": -3.738328497406236
+            },
+            "30": {
+              "count": 188,
+              "gross_bps": 0.2881094564534185,
+              "net_bps": -2.7118473271281367
+            }
+          },
+          "net_30m_interval": {
+            "lower": -6.567175059369877,
+            "upper": 1.4904409525501474,
+            "active_days": 45,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 101,
+              "active_days": 38,
+              "5": {
+                "count": 101,
+                "gross_bps": 1.2653578216273196,
+                "net_bps": -1.734452374699423
+              },
+              "15": {
+                "count": 101,
+                "gross_bps": -0.6660701032619111,
+                "net_bps": -3.6661700137773456
+              },
+              "30": {
+                "count": 101,
+                "gross_bps": 0.8482382277564033,
+                "net_bps": -2.151634536509405
+              }
+            },
+            "net_30m_interval": {
+              "lower": -6.173841077191182,
+              "upper": 2.4989187658486025,
+              "active_days": 38,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 87,
+              "active_days": 42,
+              "5": {
+                "count": 87,
+                "gross_bps": 0.4499789522739095,
+                "net_bps": -2.5499535508833513
+              },
+              "15": {
+                "count": 87,
+                "gross_bps": -0.821975394735243,
+                "net_bps": -3.8220986910443724
+              },
+              "30": {
+                "count": 87,
+                "gross_bps": -0.36215497919717304,
+                "net_bps": -3.3622093024441355
+              }
+            },
+            "net_30m_interval": {
+              "lower": -7.868748955661762,
+              "upper": 1.7591564769607755,
+              "active_days": 42,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 80,
+            "active_days": 45,
+            "5": {
+              "count": 80,
+              "gross_bps": 1.421122675683395,
+              "net_bps": -1.5786641559152512
+            },
+            "15": {
+              "count": 80,
+              "gross_bps": 1.2695878520646158,
+              "net_bps": -1.730221709757478
+            },
+            "30": {
+              "count": 80,
+              "gross_bps": 0.9319986576127591,
+              "net_bps": -2.067861542588633
+            }
+          },
+          "net_30m_interval": {
+            "lower": -6.9757196213081984,
+            "upper": 3.3027440010680027,
+            "active_days": 45,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 108,
+            "active_days": 35,
+            "5": {
+              "count": 108,
+              "gross_bps": 0.4931434701622018,
+              "net_bps": -2.5067825583173446
+            },
+            "15": {
+              "count": 108,
+              "gross_bps": -2.225481184598041,
+              "net_bps": -5.225815006775686
+            },
+            "30": {
+              "count": 108,
+              "gross_bps": -0.18884550736831532,
+              "net_bps": -3.188873834194436
+            }
+          },
+          "net_30m_interval": {
+            "lower": -8.429762792668505,
+            "upper": 2.877801928177529,
+            "active_days": 35,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      },
+      "replication_test": {
+        "all": {
+          "summary": {
+            "events": 224,
+            "active_days": 49,
+            "5": {
+              "count": 224,
+              "gross_bps": -0.264292740484545,
+              "net_bps": -3.2643323843955803
+            },
+            "15": {
+              "count": 224,
+              "gross_bps": 1.7141859228778338,
+              "net_bps": -1.2855569492337278
+            },
+            "30": {
+              "count": 224,
+              "gross_bps": 1.2217366159707694,
+              "net_bps": -1.778080123536796
+            }
+          },
+          "net_30m_interval": {
+            "lower": -5.271107009282052,
+            "upper": 2.2626487615932,
+            "active_days": 49,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "by_symbol": {
+          "SPY": {
+            "summary": {
+              "events": 109,
+              "active_days": 44,
+              "5": {
+                "count": 109,
+                "gross_bps": -0.5069645550978883,
+                "net_bps": -3.507040599781076
+              },
+              "15": {
+                "count": 109,
+                "gross_bps": 1.2252939274346737,
+                "net_bps": -1.7745222784762347
+              },
+              "30": {
+                "count": 109,
+                "gross_bps": 1.2503433575443945,
+                "net_bps": -1.749469090951954
+              }
+            },
+            "net_30m_interval": {
+              "lower": -5.137307134550876,
+              "upper": 2.4893834789649216,
+              "active_days": 44,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          },
+          "QQQ": {
+            "summary": {
+              "events": 115,
+              "active_days": 46,
+              "5": {
+                "count": 115,
+                "gross_bps": -0.03428206402494134,
+                "net_bps": -3.034287206334545
+              },
+              "15": {
+                "count": 115,
+                "gross_bps": 2.1775705098630898,
+                "net_bps": -0.8221028545603953
+              },
+              "30": {
+                "count": 115,
+                "gross_bps": 1.1946224000444639,
+                "net_bps": -1.8051984065954725
+              }
+            },
+            "net_30m_interval": {
+              "lower": -5.941259942800592,
+              "upper": 2.874809299699007,
+              "active_days": 46,
+              "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+              "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+            }
+          }
+        },
+        "first": {
+          "summary": {
+            "events": 90,
+            "active_days": 49,
+            "5": {
+              "count": 90,
+              "gross_bps": -0.615179489238899,
+              "net_bps": -3.61527176616221
+            },
+            "15": {
+              "count": 90,
+              "gross_bps": 0.507017933774809,
+              "net_bps": -2.4929060135351135
+            },
+            "30": {
+              "count": 90,
+              "gross_bps": -0.5987008718189516,
+              "net_bps": -3.598790676949739
+            }
+          },
+          "net_30m_interval": {
+            "lower": -9.81829629600436,
+            "upper": 3.1631463621845426,
+            "active_days": 49,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        },
+        "later": {
+          "summary": {
+            "events": 134,
+            "active_days": 39,
+            "5": {
+              "count": 134,
+              "gross_bps": -0.0286225360972923,
+              "net_bps": -3.0286268294776946
+            },
+            "15": {
+              "count": 134,
+              "gross_bps": 2.52497039317091,
+              "net_bps": -0.4746508612701106
+            },
+            "30": {
+              "count": 134,
+              "gross_bps": 2.4444185107549106,
+              "net_bps": -0.5552148264684016
+            }
+          },
+          "net_30m_interval": {
+            "lower": -3.636631636511146,
+            "upper": 2.771264607001962,
+            "active_days": 39,
+            "method": "Five-session circular block bootstrap, 5000 draws, seed 1729, pointwise 95%",
+            "caveat": "Exploratory event response; overlapping events, multiplicity and execution constraints preclude gate use"
+          }
+        }
+      }
+    }
+  },
+  "orb_feature_correlations": {
+    "LONG": {
+      "or15_width": {
+        "train": {
+          "n": 405,
+          "pearson": 0.019206985280826983
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.009868485273819954
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.002111791177087621
+        }
+      },
+      "or15_prior_atr": {
+        "train": {
+          "n": 366,
+          "pearson": 0.030364604691542323
+        },
+        "validation": {
+          "n": 162,
+          "pearson": 0.005502230872012445
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.011069594340119568
+        }
+      },
+      "or15_width_atr": {
+        "train": {
+          "n": 229,
+          "pearson": -0.027861325292627696
+        },
+        "validation": {
+          "n": 121,
+          "pearson": 0.09005907434234947
+        },
+        "replication_test": {
+          "n": 154,
+          "pearson": -0.07947379477703775
+        }
+      },
+      "or15_breakout_strength": {
+        "train": {
+          "n": 405,
+          "pearson": 0.11576982005632698
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.19835936398201173
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.17117572945649295
+        }
+      },
+      "body_fraction": {
+        "train": {
+          "n": 405,
+          "pearson": -0.06396689619200306
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.1000328024098302
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.06370354163672705
+        }
+      },
+      "upper_wick_fraction": {
+        "train": {
+          "n": 405,
+          "pearson": 0.037304448943868335
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.049466623741898835
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.03438334772201619
+        }
+      },
+      "volume": {
+        "train": {
+          "n": 405,
+          "pearson": 0.16934695372649583
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.15858262537043338
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.24036999505457535
+        }
+      },
+      "rvol_tod": {
+        "train": {
+          "n": 391,
+          "pearson": 0.234027642525179
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.16516619271227545
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.27363090451425615
+        }
+      },
+      "vwap_distance": {
+        "train": {
+          "n": 405,
+          "pearson": 0.04791806464967867
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.00766292867851623
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.17248480291132343
+        }
+      },
+      "vwap_slope_15": {
+        "train": {
+          "n": 405,
+          "pearson": 0.08483842330108103
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.034887184128488034
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.06070385890407643
+        }
+      },
+      "gap_atr": {
+        "train": {
+          "n": 366,
+          "pearson": 0.026269551497733887
+        },
+        "validation": {
+          "n": 156,
+          "pearson": -0.002700921188885472
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.07730596006286027
+        }
+      },
+      "premarket_range": {
+        "train": {
+          "n": 0,
+          "pearson": null
+        },
+        "validation": {
+          "n": 0,
+          "pearson": null
+        },
+        "replication_test": {
+          "n": 0,
+          "pearson": null
+        }
+      },
+      "previous_range": {
+        "train": {
+          "n": 399,
+          "pearson": -0.13736673413378084
+        },
+        "validation": {
+          "n": 189,
+          "pearson": 0.0166591030337904
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.14130229297990288
+        }
+      },
+      "previous_high_distance": {
+        "train": {
+          "n": 399,
+          "pearson": 0.08938220266196324
+        },
+        "validation": {
+          "n": 189,
+          "pearson": 0.060674363855673215
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.12217312385501286
+        }
+      },
+      "previous_low_distance": {
+        "train": {
+          "n": 399,
+          "pearson": -0.007196702104598681
+        },
+        "validation": {
+          "n": 189,
+          "pearson": 0.0697269358225367
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.02275245511245624
+        }
+      },
+      "previous_close": {
+        "train": {
+          "n": 399,
+          "pearson": -0.0122344005417238
+        },
+        "validation": {
+          "n": 189,
+          "pearson": 0.024820020128882764
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.023736700607963988
+        }
+      },
+      "atr_14": {
+        "train": {
+          "n": 229,
+          "pearson": 0.09957238724851022
+        },
+        "validation": {
+          "n": 121,
+          "pearson": -0.16091833151412785
+        },
+        "replication_test": {
+          "n": 154,
+          "pearson": 0.11076458882118329
+        }
+      },
+      "realized_volatility": {
+        "train": {
+          "n": 405,
+          "pearson": 0.06018520628411021
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.027315286516264706
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.028645415632437762
+        }
+      },
+      "opening_volatility": {
+        "train": {
+          "n": 405,
+          "pearson": 0.055402469770904274
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.044106173712017166
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.07403459660585882
+        }
+      },
+      "both_above_vwap": {
+        "train": {
+          "n": 405,
+          "pearson": -0.05046004438404313
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.048763120832164594
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.08114777378185742
+        }
+      },
+      "consecutive_directional_bars": {
+        "train": {
+          "n": 405,
+          "pearson": -0.07593430276788331
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.04549495149777563
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.0009806029649877832
+        }
+      },
+      "breakout_number": {
+        "train": {
+          "n": 405,
+          "pearson": 0.005634124845666301
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.05051912832079653
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.06964076594533543
+        }
+      },
+      "minutes_since_open": {
+        "train": {
+          "n": 405,
+          "pearson": 0.0890819199013986
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.04310840366842035
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.02969328156961498
+        }
+      },
+      "day_of_week": {
+        "train": {
+          "n": 405,
+          "pearson": 0.006049445734305283
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.1427302792834443
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.02294245585768952
+        }
+      },
+      "time_of_month": {
+        "train": {
+          "n": 405,
+          "pearson": 0.017191303036850614
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.09573105480523221
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.03536330657297648
+        }
+      },
+      "previous_close_distance": {
+        "train": {
+          "n": 399,
+          "pearson": 0.0043827219977438546
+        },
+        "validation": {
+          "n": 189,
+          "pearson": 0.020550103590649283
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.05200352461981772
+        }
+      },
+      "vwap_relationship": {
+        "train": {
+          "n": 405,
+          "pearson": -0.022344499200416097
+        },
+        "validation": {
+          "n": 195,
+          "pearson": 0.02555982297056764
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.08256067232337581
+        }
+      },
+      "or15_distance": {
+        "train": {
+          "n": 405,
+          "pearson": 0.1336882406038708
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.07155007142660838
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": -0.16368692355222034
+        }
+      },
+      "lower_wick_fraction": {
+        "train": {
+          "n": 405,
+          "pearson": 0.048285923353797715
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.07058449987008479
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.04940035334244885
+        }
+      },
+      "prior_daily_atr": {
+        "train": {
+          "n": 366,
+          "pearson": 0.023799357472874233
+        },
+        "validation": {
+          "n": 162,
+          "pearson": 0.0023423776536609666
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.016332031628505366
+        }
+      },
+      "cross_relative_momentum": {
+        "train": {
+          "n": 405,
+          "pearson": 0.018500894763259914
+        },
+        "validation": {
+          "n": 195,
+          "pearson": -0.1343334520135415
+        },
+        "replication_test": {
+          "n": 231,
+          "pearson": 0.048572749399812404
+        }
+      }
+    },
+    "SHORT_DIAGNOSTIC_ONLY": {
+      "or15_width": {
+        "train": {
+          "n": 392,
+          "pearson": -0.04480303239908997
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.20095079201119861
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.10670366895022161
+        }
+      },
+      "or15_prior_atr": {
+        "train": {
+          "n": 348,
+          "pearson": -0.09026283239344103
+        },
+        "validation": {
+          "n": 146,
+          "pearson": -0.2684738932511917
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.09264397911988262
+        }
+      },
+      "or15_width_atr": {
+        "train": {
+          "n": 240,
+          "pearson": 0.03432247755516459
+        },
+        "validation": {
+          "n": 113,
+          "pearson": -0.024552724751197064
+        },
+        "replication_test": {
+          "n": 132,
+          "pearson": -0.034152010682023545
+        }
+      },
+      "or15_breakout_strength": {
+        "train": {
+          "n": 392,
+          "pearson": -0.024012130435923408
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.04100574321921939
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.01215700382683086
+        }
+      },
+      "body_fraction": {
+        "train": {
+          "n": 392,
+          "pearson": -0.00048817021369495963
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.01171958555743909
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.06019344275475813
+        }
+      },
+      "upper_wick_fraction": {
+        "train": {
+          "n": 392,
+          "pearson": -0.07559794761157691
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.015521800225285085
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.01788424681325884
+        }
+      },
+      "volume": {
+        "train": {
+          "n": 392,
+          "pearson": 0.12164268681078395
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.03275475021253169
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.030931243909295723
+        }
+      },
+      "rvol_tod": {
+        "train": {
+          "n": 375,
+          "pearson": 0.12557215169205774
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.11351183519592756
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.04631294016596114
+        }
+      },
+      "vwap_distance": {
+        "train": {
+          "n": 392,
+          "pearson": 0.0025868775008796884
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.048203142095209824
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.0019137206854572739
+        }
+      },
+      "vwap_slope_15": {
+        "train": {
+          "n": 392,
+          "pearson": 0.2181805613542274
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.08785835286665074
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.0891846021508353
+        }
+      },
+      "gap_atr": {
+        "train": {
+          "n": 348,
+          "pearson": 0.01935228597302493
+        },
+        "validation": {
+          "n": 146,
+          "pearson": -0.07553924841272479
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.0163551188555104
+        }
+      },
+      "premarket_range": {
+        "train": {
+          "n": 0,
+          "pearson": null
+        },
+        "validation": {
+          "n": 0,
+          "pearson": null
+        },
+        "replication_test": {
+          "n": 0,
+          "pearson": null
+        }
+      },
+      "previous_range": {
+        "train": {
+          "n": 390,
+          "pearson": 0.10664430928163918
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.1369379343556587
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.13884128837772597
+        }
+      },
+      "previous_high_distance": {
+        "train": {
+          "n": 390,
+          "pearson": 0.03564102034445572
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.0651536390175679
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.03849894358420949
+        }
+      },
+      "previous_low_distance": {
+        "train": {
+          "n": 390,
+          "pearson": 0.10626651660237053
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.0256871516648367
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.043559175405433644
+        }
+      },
+      "previous_close": {
+        "train": {
+          "n": 390,
+          "pearson": 0.01689239725325374
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.0033927306756945156
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.018095570276292047
+        }
+      },
+      "atr_14": {
+        "train": {
+          "n": 240,
+          "pearson": -0.05538986969686607
+        },
+        "validation": {
+          "n": 113,
+          "pearson": -0.10704129675319263
+        },
+        "replication_test": {
+          "n": 132,
+          "pearson": 0.16333703822003104
+        }
+      },
+      "realized_volatility": {
+        "train": {
+          "n": 392,
+          "pearson": 0.01656548322383206
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.13910286246369177
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.14383901386574977
+        }
+      },
+      "opening_volatility": {
+        "train": {
+          "n": 392,
+          "pearson": -0.0031666341321857894
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.14776012407750583
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.04766283684747913
+        }
+      },
+      "both_above_vwap": {
+        "train": {
+          "n": 392,
+          "pearson": -0.027223435550411762
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.05350373923069293
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.03846198377646202
+        }
+      },
+      "consecutive_directional_bars": {
+        "train": {
+          "n": 392,
+          "pearson": 0.03105713105735147
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.017568150421469045
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.08361122838441526
+        }
+      },
+      "breakout_number": {
+        "train": {
+          "n": 392,
+          "pearson": 0.016198731782232287
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.09918503664702026
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.03694746824476713
+        }
+      },
+      "minutes_since_open": {
+        "train": {
+          "n": 392,
+          "pearson": 0.016368628561083846
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.08660661779262953
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.0194726924917876
+        }
+      },
+      "day_of_week": {
+        "train": {
+          "n": 392,
+          "pearson": 0.08867235933246764
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.13611215172291818
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.1216341312550602
+        }
+      },
+      "time_of_month": {
+        "train": {
+          "n": 392,
+          "pearson": 0.03346696225330377
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.001962314064957143
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.059630975109173645
+        }
+      },
+      "previous_close_distance": {
+        "train": {
+          "n": 390,
+          "pearson": 0.060369395543149434
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.027168332746623856
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.002971025454548152
+        }
+      },
+      "vwap_relationship": {
+        "train": {
+          "n": 392,
+          "pearson": -0.01760143567051369
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.06768899757082061
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.012065458833348489
+        }
+      },
+      "or15_distance": {
+        "train": {
+          "n": 392,
+          "pearson": 0.016591269443612985
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.2105050397829212
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.1310749302926047
+        }
+      },
+      "lower_wick_fraction": {
+        "train": {
+          "n": 392,
+          "pearson": 0.07565457835070846
+        },
+        "validation": {
+          "n": 188,
+          "pearson": -0.030115281084840788
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.05966276537935199
+        }
+      },
+      "prior_daily_atr": {
+        "train": {
+          "n": 348,
+          "pearson": -0.026878121924808915
+        },
+        "validation": {
+          "n": 146,
+          "pearson": 0.06139278662114405
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": 0.0673499409082241
+        }
+      },
+      "cross_relative_momentum": {
+        "train": {
+          "n": 392,
+          "pearson": -0.015225809079835315
+        },
+        "validation": {
+          "n": 188,
+          "pearson": 0.02774017923918651
+        },
+        "replication_test": {
+          "n": 224,
+          "pearson": -0.08356452995911509
+        }
+      }
+    }
+  },
+  "same_symbol_position_overlap": {
+    "orb": {
+      "orb": 5,
+      "filtered_orb": 1,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "filtered_orb": {
+      "orb": 1,
+      "filtered_orb": 1,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "orb_retest": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "vwap_trend": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 1,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 1,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "vwap_reversion": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "gap_continuation": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "gap_fade": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "opening_drive": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "failed_breakout": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "vwap_reclaim": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 1,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 3,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "trend_pullback": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "range_breakout": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "momentum_continuation": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    },
+    "exhaustion_reversion": {
+      "orb": 0,
+      "filtered_orb": 0,
+      "orb_retest": 0,
+      "vwap_trend": 0,
+      "vwap_reversion": 0,
+      "gap_continuation": 0,
+      "gap_fade": 0,
+      "opening_drive": 0,
+      "failed_breakout": 0,
+      "vwap_reclaim": 0,
+      "trend_pullback": 0,
+      "range_breakout": 0,
+      "momentum_continuation": 0,
+      "exhaustion_reversion": 0
+    }
+  },
+  "matched_entry_exit_comparisons": {
+    "orb": {
+      "target15": {
+        "matched_entries": 4,
+        "mean_pnl_change": 0.0,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 4,
+        "mean_pnl_change": 0.00011831225109164951,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "filtered_orb": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "orb_retest": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "vwap_trend": {
+      "target15": {
+        "matched_entries": 1,
+        "mean_pnl_change": 0.0,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 1,
+        "mean_pnl_change": 0.019718341903606502,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "vwap_reversion": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "gap_continuation": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "gap_fade": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "opening_drive": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "failed_breakout": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "vwap_reclaim": {
+      "target15": {
+        "matched_entries": 3,
+        "mean_pnl_change": 0.0,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 3,
+        "mean_pnl_change": 0.009402301156935225,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 1,
+        "mean_pnl_change": 0.0,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "trend_pullback": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "range_breakout": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "momentum_continuation": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    },
+    "exhaustion_reversion": {
+      "target15": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "hold20": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      },
+      "structure": {
+        "matched_entries": 0,
+        "mean_pnl_change": null,
+        "note": "Same symbol, entry timestamp and quantity; development/validation only; tiny dependent sample, not causal proof of improvement"
+      }
+    }
+  },
+  "failure_attribution": {
+    "orb": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 500,
+      "reservations": 86,
+      "fills": 5,
+      "fill_fraction_of_setups": 0.01,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 30,
+        "FILL:BELOW_TRIGGER": 25,
+        "FILL:EXPIRED": 14,
+        "FILL:Fill exceeds reserved risk": 12,
+        "FILL:Outside entry range": 55,
+        "RISK:ABOVE_ENTRY_BAND": 85,
+        "RISK:BELOW_TRIGGER": 499,
+        "RISK:Friction too large relative to stop": 39,
+        "RISK:Outside entry range": 500
+      },
+      "net_sample_negative": true,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "filtered_orb": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "FILTER_ATTRITION"
+      ],
+      "unique_setups": 30,
+      "reservations": 5,
+      "fills": 1,
+      "fill_fraction_of_setups": 0.03333333333333333,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 1,
+        "FILL:BELOW_TRIGGER": 1,
+        "FILL:EXPIRED": 2,
+        "FILL:Outside entry range": 2,
+        "RISK:ABOVE_ENTRY_BAND": 4,
+        "RISK:BELOW_TRIGGER": 30,
+        "RISK:Friction too large relative to stop": 2,
+        "RISK:Outside entry range": 30
+      },
+      "net_sample_negative": true,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "orb_retest": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 98,
+      "reservations": 2,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:BELOW_TRIGGER": 1,
+        "FILL:EXPIRED": 1,
+        "FILL:Outside entry range": 1,
+        "RISK:ABOVE_ENTRY_BAND": 43,
+        "RISK:BELOW_TRIGGER": 97,
+        "RISK:Friction too large relative to stop": 24,
+        "RISK:Outside entry range": 97
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "vwap_trend": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "COST_AND_SELECTION_SENSITIVE"
+      ],
+      "unique_setups": 140,
+      "reservations": 4,
+      "fills": 1,
+      "fill_fraction_of_setups": 0.007142857142857143,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 1,
+        "FILL:BELOW_TRIGGER": 1,
+        "FILL:Fill exceeds reserved risk": 1,
+        "FILL:Outside entry range": 2,
+        "RISK:ABOVE_ENTRY_BAND": 58,
+        "RISK:BELOW_TRIGGER": 138,
+        "RISK:Friction too large relative to stop": 41,
+        "RISK:Outside entry range": 140
+      },
+      "net_sample_negative": true,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "vwap_reversion": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "COST_AND_SELECTION_SENSITIVE"
+      ],
+      "unique_setups": 431,
+      "reservations": 1,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:EXPIRED": 1,
+        "RISK:ABOVE_ENTRY_BAND": 189,
+        "RISK:BELOW_TRIGGER": 424,
+        "RISK:Friction too large relative to stop": 102,
+        "RISK:Outside entry range": 431
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "gap_continuation": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 295,
+      "reservations": 12,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 3,
+        "FILL:BELOW_TRIGGER": 6,
+        "FILL:EXPIRED": 2,
+        "FILL:Fill exceeds reserved risk": 1,
+        "FILL:Outside entry range": 9,
+        "RISK:ABOVE_ENTRY_BAND": 102,
+        "RISK:BELOW_TRIGGER": 291,
+        "RISK:Friction too large relative to stop": 71,
+        "RISK:Outside entry range": 295
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "gap_fade": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 51,
+      "reservations": 3,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 1,
+        "FILL:BELOW_TRIGGER": 1,
+        "FILL:EXPIRED": 1,
+        "FILL:Outside entry range": 2,
+        "RISK:ABOVE_ENTRY_BAND": 17,
+        "RISK:BELOW_TRIGGER": 51,
+        "RISK:Friction too large relative to stop": 6,
+        "RISK:Outside entry range": 51
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "opening_drive": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "CAPABILITY_LIMITED"
+      ],
+      "unique_setups": 6,
+      "reservations": 0,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "CAPABILITY:PRODUCTION_ENTRY_WINDOW": 3,
+        "RISK:ABOVE_ENTRY_BAND": 1,
+        "RISK:BELOW_TRIGGER": 3,
+        "RISK:Friction too large relative to stop": 1,
+        "RISK:Outside entry range": 3
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "failed_breakout": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 110,
+      "reservations": 10,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 3,
+        "FILL:BELOW_TRIGGER": 3,
+        "FILL:EXPIRED": 2,
+        "FILL:Fill exceeds reserved risk": 2,
+        "FILL:Outside entry range": 6,
+        "RISK:ABOVE_ENTRY_BAND": 56,
+        "RISK:BELOW_TRIGGER": 109,
+        "RISK:Friction too large relative to stop": 31,
+        "RISK:Outside entry range": 110
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "vwap_reclaim": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "COST_AND_SELECTION_SENSITIVE"
+      ],
+      "unique_setups": 320,
+      "reservations": 41,
+      "fills": 3,
+      "fill_fraction_of_setups": 0.009375,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 7,
+        "FILL:BELOW_TRIGGER": 14,
+        "FILL:EXPIRED": 9,
+        "FILL:Fill exceeds reserved risk": 8,
+        "FILL:Outside entry range": 21,
+        "RISK:ABOVE_ENTRY_BAND": 133,
+        "RISK:BELOW_TRIGGER": 307,
+        "RISK:Friction too large relative to stop": 83,
+        "RISK:Outside entry range": 314
+      },
+      "net_sample_negative": true,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "trend_pullback": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 339,
+      "reservations": 3,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 2,
+        "FILL:BELOW_TRIGGER": 1,
+        "FILL:Outside entry range": 3,
+        "RISK:ABOVE_ENTRY_BAND": 140,
+        "RISK:BELOW_TRIGGER": 332,
+        "RISK:Friction too large relative to stop": 108,
+        "RISK:Outside entry range": 339
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "range_breakout": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "COST_AND_SELECTION_SENSITIVE"
+      ],
+      "unique_setups": 193,
+      "reservations": 10,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "FILL:ABOVE_ENTRY_BAND": 5,
+        "FILL:BELOW_TRIGGER": 5,
+        "FILL:Outside entry range": 10,
+        "RISK:ABOVE_ENTRY_BAND": 56,
+        "RISK:BELOW_TRIGGER": 190,
+        "RISK:Friction too large relative to stop": 65,
+        "RISK:Outside entry range": 192
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "momentum_continuation": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED"
+      ],
+      "unique_setups": 17,
+      "reservations": 0,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "RISK:ABOVE_ENTRY_BAND": 5,
+        "RISK:BELOW_TRIGGER": 17,
+        "RISK:Friction too large relative to stop": 4,
+        "RISK:Outside entry range": 17
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    },
+    "exhaustion_reversion": {
+      "classes": [
+        "LOW_SAMPLE",
+        "DATA_LIMITED",
+        "EXECUTION_CONSTRAINED",
+        "COST_AND_SELECTION_SENSITIVE"
+      ],
+      "unique_setups": 61,
+      "reservations": 0,
+      "fills": 0,
+      "fill_fraction_of_setups": 0.0,
+      "unique_rejection_reasons": {
+        "RISK:ABOVE_ENTRY_BAND": 36,
+        "RISK:BELOW_TRIGGER": 59,
+        "RISK:Friction too large relative to stop": 14,
+        "RISK:Outside entry range": 61
+      },
+      "net_sample_negative": false,
+      "population_negative_edge_established": false,
+      "cost_only_causation_established": false,
+      "classification_note": "Cost/selection sensitivity means zero-cost rerun is positive while realistic replay is not; cohorts differ, so this is not a matched cost-only effect.",
+      "unknowable_from_fills": [
+        "regime advantage",
+        "symbol advantage",
+        "time-of-day advantage",
+        "volatility/gap advantage",
+        "parameter stability",
+        "population Sharpe"
+      ]
+    }
+  },
+  "event_warning": "Forward mid-price responses bypass trigger fills; these are descriptive diagnostics, never a deployable strategy or acceptance evidence"
+}

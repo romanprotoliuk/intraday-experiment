@@ -95,6 +95,45 @@ def test_pending_failure_consumes_setup_and_no_fill_does_not_create_pnl():
     assert not r['trades'] and r['metrics']['pnl']==0 and r['funnel']['reserved']==2
 
 
+def test_intrabar_exit_does_not_release_symbol_at_same_minute_open():
+    from trader.multistrategy.strategies import Strategy
+    class Repeating(Strategy):
+        id='repeating-synthetic'
+        def evaluate(self,f,s):return self.signal(f,s,100,99,'synthetic',anchor=f.at,vwap_exit=False)
+    d=day();d.minutes['SPY'][20]['low_price']='98'
+    r=run([d],build_tape([d]),Repeating())
+    starts=[dt(x['at']) for x in r['reservations'] if x['symbol']=='SPY']
+    assert d.session.open+timedelta(minutes=20) not in starts
+    assert d.session.open+timedelta(minutes=21) in starts
+
+
+def test_outside_band_distinguishes_waiting_from_extension():
+    d=day()
+    for s in ('SPY','QQQ'):
+        d.minutes[s][15].update(open_price='99.9',low_price='99.8')
+        d.minutes[s][16].update(open_price='101',high_price='101.1')
+    r=run([d],build_tape([d]),Always())
+    assert r['diagnostics']['RISK:BELOW_TRIGGER']>=2
+    assert r['diagnostics']['RISK:ABOVE_ENTRY_BAND']>=2
+
+
+def test_new_research_strategies_cannot_be_enabled_via_production_registry():
+    from trader.multistrategy.registry import Registry
+    for name in NEW:
+        with pytest.raises(Unsafe,match='Unknown'):
+            Registry(dict(version=1,mode='MULTI_LIVE',strategies=[dict(id=name,status='LIVE_ELIGIBLE',live_enabled=True)]))
+
+
+def test_failed_breakout_timeout_and_opening_setup_identity():
+    d,f=fixture('failed_breakout');bs=list(f.bars);bs[-3]['close_price']='100.01';bs[3]['close_price']='99.8'
+    assert Hypothesis('failed_breakout').evaluate(replace(f,bars=tuple(bs)),d.session).signal is None
+    d,f=fixture('opening_drive');h=Hypothesis('opening_drive')
+    a=h.evaluate(f,d.session).signal
+    later=replace(f,at=(d.session.open+timedelta(minutes=15)).isoformat(),values={**f.values,'minutes_since_open':15})
+    b=h.evaluate(later,d.session).signal
+    assert a.setup_id==b.setup_id and dt(a.valid_until)==dt(b.signal_at)
+
+
 def test_signal_event_response_is_not_trigger_fill_and_is_directional():
     d=day();f=enrich(frame(d,3));d.minutes['SPY'][31]['open_price']='101'
     long=event(d,'SPY',f);short=event(d,'SPY',f,-1)

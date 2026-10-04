@@ -1,0 +1,1142 @@
+{
+  "protocol": {
+    "source": "FirstRate public two-week sample",
+    "start": "2026-09-21",
+    "end_exclusive": "2026-10-03",
+    "status": "Recent-period external replication, NOT untouched: dates overlap previously observed trading sessions",
+    "selection": "All 14 already frozen defaults; no tuning; base/stress only",
+    "history": "No bridging 2023 history into 2026; warmup remains unavailable",
+    "acceptance": "No existing failed gate is relaxed; this is a diagnostic, not live promotion evidence"
+  },
+  "data": {
+    "source": "FirstRate recent public sample",
+    "files": {
+      "SPY": {
+        "sha256": "0a8afd579bc1747fbb83aba4146634883eb26bb1a57cdef7830c519b34b3384e",
+        "rows": 8784
+      },
+      "QQQ": {
+        "sha256": "85382a2654f8dd57795f6cdde3fecdfd7f4af5f688e138e7a516a9b9e11de12d",
+        "rows": 9182
+      }
+    },
+    "excluded": [],
+    "repairs": [
+      "Added explicit column header; no OHLCV rows changed"
+    ],
+    "historical_quotes": false,
+    "adjustment_basis": "Vendor describes split-adjusted; not independently verified",
+    "holdout_untouched": false,
+    "expected_sessions": 10,
+    "complete_sessions": 10,
+    "first": "2026-09-21",
+    "last": "2026-10-02",
+    "coverage": 1.0
+  },
+  "strategies": {
+    "orb": {
+      "base": {
+        "metrics": {
+          "trades": 1,
+          "winners": 1,
+          "losers": 0,
+          "win_rate": 1.0,
+          "average_winner": 0.001490745063159825,
+          "average_loser": null,
+          "expectancy": 0.001490745063159825,
+          "profit_factor": null,
+          "pnl": 0.001490745063159825,
+          "total_r": 0.019059371234548865,
+          "max_drawdown": 0.011505364703,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": 30,
+          "median_hold": 30,
+          "trades_per_month": 0.5,
+          "estimated_transaction_costs": 0.0029912199368404184,
+          "estimated_slippage": 0.001994146617090175,
+          "long_trades": 1,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 20,
+          "reserved": 5,
+          "filled": 1,
+          "unique_rejections": {
+            "FILL:ABOVE_ENTRY_BAND": 2,
+            "FILL:BELOW_TRIGGER": 1,
+            "FILL:Fill exceeds reserved risk": 1,
+            "FILL:Outside entry range": 3,
+            "RISK:ABOVE_ENTRY_BAND": 3,
+            "RISK:BELOW_TRIGGER": 18,
+            "RISK:Friction too large relative to stop": 3,
+            "RISK:Outside entry range": 19
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 20,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 8,
+            "RISK:BELOW_TRIGGER": 16,
+            "RISK:Friction too large relative to stop": 8,
+            "RISK:Outside entry range": 20
+          }
+        }
+      }
+    },
+    "filtered_orb": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 2,
+          "reserved": 1,
+          "filled": 0,
+          "unique_rejections": {
+            "FILL:Fill exceeds reserved risk": 1,
+            "RISK:ABOVE_ENTRY_BAND": 1,
+            "RISK:BELOW_TRIGGER": 2,
+            "RISK:Friction too large relative to stop": 1,
+            "RISK:Outside entry range": 2
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 2,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 2,
+            "RISK:Friction too large relative to stop": 2,
+            "RISK:Outside entry range": 2
+          }
+        }
+      }
+    },
+    "orb_retest": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 5,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 3,
+            "RISK:BELOW_TRIGGER": 5,
+            "RISK:Friction too large relative to stop": 3,
+            "RISK:Outside entry range": 5
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 5,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 4,
+            "RISK:BELOW_TRIGGER": 4,
+            "RISK:Friction too large relative to stop": 2,
+            "RISK:Outside entry range": 5
+          }
+        }
+      }
+    },
+    "vwap_trend": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 6,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 5,
+            "RISK:BELOW_TRIGGER": 6,
+            "RISK:Friction too large relative to stop": 2,
+            "RISK:Outside entry range": 6
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 6,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 5,
+            "RISK:BELOW_TRIGGER": 3,
+            "RISK:Friction too large relative to stop": 3,
+            "RISK:Outside entry range": 6
+          }
+        }
+      }
+    },
+    "vwap_reversion": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 13,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 7,
+            "RISK:BELOW_TRIGGER": 12,
+            "RISK:Friction too large relative to stop": 4,
+            "RISK:Outside entry range": 13
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 13,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 13,
+            "RISK:BELOW_TRIGGER": 7,
+            "RISK:Friction too large relative to stop": 5,
+            "RISK:Outside entry range": 13
+          }
+        }
+      }
+    },
+    "gap_continuation": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      }
+    },
+    "gap_fade": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      }
+    },
+    "opening_drive": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      }
+    },
+    "failed_breakout": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 1,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:BELOW_TRIGGER": 1,
+            "RISK:Outside entry range": 1
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 1,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:BELOW_TRIGGER": 1,
+            "RISK:Friction too large relative to stop": 1,
+            "RISK:Outside entry range": 1
+          }
+        }
+      }
+    },
+    "vwap_reclaim": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 10,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 4,
+            "RISK:BELOW_TRIGGER": 10,
+            "RISK:Friction too large relative to stop": 4,
+            "RISK:Outside entry range": 10
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 10,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 6,
+            "RISK:BELOW_TRIGGER": 7,
+            "RISK:Friction too large relative to stop": 6,
+            "RISK:Outside entry range": 10
+          }
+        }
+      }
+    },
+    "trend_pullback": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 14,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 4,
+            "RISK:BELOW_TRIGGER": 13,
+            "RISK:Friction too large relative to stop": 6,
+            "RISK:Outside entry range": 14
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 14,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 12,
+            "RISK:BELOW_TRIGGER": 9,
+            "RISK:Friction too large relative to stop": 8,
+            "RISK:Outside entry range": 14
+          }
+        }
+      }
+    },
+    "range_breakout": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 2,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:BELOW_TRIGGER": 2,
+            "RISK:Outside entry range": 2
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 2,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:BELOW_TRIGGER": 2,
+            "RISK:Friction too large relative to stop": 1,
+            "RISK:Outside entry range": 2
+          }
+        }
+      }
+    },
+    "momentum_continuation": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 0,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {}
+        }
+      }
+    },
+    "exhaustion_reversion": {
+      "base": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 1,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:BELOW_TRIGGER": 1,
+            "RISK:Friction too large relative to stop": 1,
+            "RISK:Outside entry range": 1
+          }
+        }
+      },
+      "stress": {
+        "metrics": {
+          "trades": 0,
+          "winners": 0,
+          "losers": 0,
+          "win_rate": null,
+          "average_winner": null,
+          "average_loser": null,
+          "expectancy": null,
+          "profit_factor": null,
+          "pnl": 0,
+          "total_r": 0,
+          "max_drawdown": 0.0,
+          "max_drawdown_r": 0.0,
+          "max_consecutive_losses": 0,
+          "sharpe": null,
+          "sharpe_note": "Not asserted: small, dependent strategy sample; daily uncertainty intervals reported instead",
+          "average_hold": null,
+          "median_hold": null,
+          "trades_per_month": 0.0,
+          "estimated_transaction_costs": 0,
+          "estimated_slippage": 0,
+          "long_trades": 0,
+          "short_trades": 0,
+          "short_support": false,
+          "sessions": 10,
+          "without_best_day": 0.0
+        },
+        "funnel": {
+          "unique_signals": 1,
+          "reserved": 0,
+          "filled": 0,
+          "unique_rejections": {
+            "RISK:ABOVE_ENTRY_BAND": 1,
+            "RISK:Friction too large relative to stop": 1,
+            "RISK:Outside entry range": 1
+          }
+        }
+      }
+    }
+  }
+}

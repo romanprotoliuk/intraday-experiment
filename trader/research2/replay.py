@@ -23,6 +23,12 @@ def run(days,tape,strategy,costs=Costs(),*,run_id='phase2',code_commit='uncommit
     cash=D(50);net=D(0);peak=cash;drawdown=D(0);trades=[];daily=[];signals_audit={}
     counts=Counter();rejected=defaultdict(set);reserved=set();filled=set();used=set();decisions=[];fill_number=0
     def reject(reason,sig):counts[reason]+=1;rejected[reason].add(sig.setup_id)
+    def execution_reject(stage,exc,sig,mid,now):
+        reason=str(exc)
+        reject(stage+':'+reason,sig)
+        if reason=='Outside entry range':
+            ask=D(quote(mid,now,costs)['ask_price'])
+            reject(stage+':'+('BELOW_TRIGGER' if ask<D(str(sig.entry)) else 'ABOVE_ENTRY_BAND'),sig)
     for day in days:
         session=day.session;start=cash;daynet=D(0);losses=D(0);attempts=0;positions={};pending={};signals={};frames={}
 
@@ -91,7 +97,7 @@ def run(days,tape,strategy,costs=Costs(),*,run_id='phase2',code_commit='uncommit
                         stop=str(sig.stop),target=str(entry+D(str(sig.target_r))*(entry-D(str(sig.stop)))),
                         planned_risk=str(risk),deadline=iso(now+timedelta(minutes=sig.max_hold_minutes)),vwap_exit=sig.vwap_exit,
                         estimated_entry_cost=str(q*(entry-D(str(day.minutes[sym][index]['open_price'])))+fee),fill_fraction=costs.fill_fraction,recovery_events=[])
-                except Unsafe as exc:reject('FILL:'+str(exc),sig)
+                except Unsafe as exc:execution_reject('FILL',exc,sig,day.minutes[sym][index]['open_price'],now)
             for sym,sig in sorted(signals.items()):
                 if not sig or sig.setup_id in used:continue
                 if sig.direction!='LONG':reject('CAPABILITY:SHORT_UNSUPPORTED',sig);continue
@@ -104,7 +110,7 @@ def run(days,tape,strategy,costs=Costs(),*,run_id='phase2',code_commit='uncommit
                     used.add(sig.setup_id);reserved.add(sig.setup_id);attempts+=1
                     pending[sym]=dict(signal=sig,proposal=proposed,due=index+1+costs.latency_minutes,index=index)
                     decisions.append(dict(day=session.day,symbol=sym,at=iso(now),setup_id=sig.setup_id,reserved_risk=proposed['planned_risk'],reserved_notional=proposed['notional']))
-                except Unsafe as exc:reject('RISK:'+str(exc),sig)
+                except Unsafe as exc:execution_reject('RISK',exc,sig,day.minutes[sym][index]['open_price'],now)
             # Only now may this minute's range affect protective exits.
             for sym,p in list(positions.items()):
                 result=exit_decision(p,day.minutes[sym][index],index,session,frames.get(sym),costs)

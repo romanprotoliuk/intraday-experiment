@@ -22,7 +22,9 @@ def save(path,value):Path(path).write_text(json.dumps(value,indent=2,allow_nan=F
 def prepare(raw,output):
     """Self-generated local cache only. Never load downloaded or user-provided pickle."""
     days,manifest=load_vendor(raw)
-    digest=fingerprint(dict(data=manifest,features=hashlib.sha256(Path(__file__).with_name('features.py').read_bytes()).hexdigest()))
+    dependencies=[Path(__file__).with_name('features.py')]+[Path('trader')/p for p in
+        ('multistrategy/features.py','multistrategy/data.py','multistrategy/validation_data.py','calendar.py','models.py')]
+    digest=fingerprint(dict(data=manifest,features={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in dependencies}))
     cache=output/('local-tape-'+digest+'.pickle.gz')
     # Cache is used only within this explicitly local ignored output directory.
     if cache.exists():
