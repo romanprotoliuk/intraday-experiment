@@ -1,0 +1,115 @@
+{
+  "version": "research-phase2-1",
+  "data_status": "Previously inspected 2022-09-30 to 2023-09-29 sample; NO untouched test available",
+  "train": [
+    "2022-09-30",
+    "2023-04-01"
+  ],
+  "validation": [
+    "2023-04-01",
+    "2023-07-01"
+  ],
+  "replication_test": [
+    "2023-07-01",
+    "2023-09-30"
+  ],
+  "hypothesis_selection": "Fixed defaults, no optimization. Variants and exit alternatives on TRAIN/VALIDATION only. Freeze before second-phase returns; all final-period readings labelled replication.",
+  "gates": {
+    "positive_validation_and_test_net_expectancy": true,
+    "positive_stress_test_expectancy": true,
+    "positive_day_block_bootstrap_lower_bound": true,
+    "family_alpha": 0.05,
+    "hypotheses": 70,
+    "bootstrap_replicates": 5000,
+    "bootstrap_seed": 20261003,
+    "minimum_trade_days_for_interval": 20,
+    "sample_floor_note": "20 active day clusters is a minimum for reporting a resampled interval, not a universal adequate trade count or proof of edge. Precision and independent period evidence still required.",
+    "positive_without_best_day": true,
+    "max_drawdown_dollars": 1.5,
+    "minimum_positive_walk_forward_fraction": 0.6666666666666666,
+    "minimum_nonnegative_sensitivity_fraction": 0.75,
+    "test_expectancy_at_least_fraction_of_validation": 0.5,
+    "untouched_independent_test_required_for_live": true,
+    "live_feature_parity_required": true,
+    "shadow_execution_evidence_required": true,
+    "operator_live_enable_required": true,
+    "multiplicity_note": "Bonferroni budget 70 covers 14 base hypotheses and declared variants/exits. Exploratory features are not confirmatory tests."
+  },
+  "risk": {
+    "capital_per_trade": 10,
+    "planned_loss_per_trade": 0.15,
+    "max_positions": 3,
+    "max_exposure": 30,
+    "daily_gross_loss": 1.5,
+    "attempts": 5,
+    "cash_reserve": 20,
+    "positions_per_symbol": 1,
+    "profits_replenish": false
+  },
+  "strategies": [
+    "orb",
+    "filtered_orb",
+    "orb_retest",
+    "vwap_trend",
+    "vwap_reversion",
+    "gap_continuation",
+    "gap_fade",
+    "opening_drive",
+    "failed_breakout",
+    "vwap_reclaim",
+    "trend_pullback",
+    "range_breakout",
+    "momentum_continuation",
+    "exhaustion_reversion"
+  ],
+  "variants": "One economically justified variant per old family plus target 1.5R and hold 20m exits; new-family threshold multipliers 0.8 and 1.2; no combinations. All development only.",
+  "exit_research": [
+    "unchanged 2R/30m control",
+    "1.5R/30m",
+    "2R/20m",
+    "frozen structural target when directionally valid"
+  ],
+  "costs": {
+    "base": {
+      "spread_bps": 1,
+      "slippage_bps": 1,
+      "fee_per_side": 0,
+      "latency_minutes": 0,
+      "fill_fraction": 1
+    },
+    "stress": {
+      "spread_bps": 5,
+      "slippage_bps": 2,
+      "fee_per_side": 0.01,
+      "latency_minutes": 1,
+      "fill_fraction": 1
+    },
+    "partial": {
+      "spread_bps": 1,
+      "slippage_bps": 1,
+      "fee_per_side": 0.01,
+      "latency_minutes": 1,
+      "fill_fraction": 0.5
+    }
+  },
+  "extra_stresses": {
+    "wide_spread": {
+      "spread_bps": 5
+    },
+    "high_slippage": {
+      "slippage_bps": 3
+    },
+    "delay": {
+      "latency_minutes": 1
+    },
+    "missed": {
+      "fill_fraction": 0
+    }
+  },
+  "signal_event_study": "Unique causal setups at next-minute open; 5/15/30 minute forward mid-price returns and same-path cost deductions. Overlapping events are dependent and are NOT executable profits or validation evidence. Bearish VWAP loss included only here.",
+  "regime": "Research classifier v2 with explicit eligibility, evaluated separately from unchanged v1 controls. UNCERTAIN is NO NEW TRADE.",
+  "orb_decomposition": "Fixed economic bins plus train-only terciles. Chronological group associations are descriptive; no selected filter from replication-period correlations.",
+  "portfolio": "Aligned daily returns including zeros, drawdown correlation and setup-time overlap. Undefined correlations remain null. Independently funded simulations are not a shared portfolio.",
+  "shadow": "Only quantitative gate passing strategies eligible; no automatically created config, service restart or broker mutation.",
+  "live": "Independent untouched evidence, live feature/execution parity and prospective shadow evidence mandatory. No live enablement during research."
+}
