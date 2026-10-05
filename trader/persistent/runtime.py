@@ -1,5 +1,5 @@
 """Persistent supervisor/worker using the existing supported Robinhood MCP transport."""
-import asyncio,json,os,signal,subprocess,sys,time
+import asyncio,json,os,signal,subprocess,sys,time,uuid
 from datetime import datetime,timedelta
 from pathlib import Path
 from ..broker import connect,BrokerToolError,failure_details
@@ -12,6 +12,7 @@ from .db import Ledger
 from .engine import Coordinator
 from .risk import CFG
 from .recovery import load_policy
+from .system_recovery import record_hold, recover_flat, read_hold, restart_permitted
 from ..configuration import applied,apply,market_config,assert_current,fingerprint,path as config_path,warnings
 
 
@@ -76,6 +77,7 @@ def report(root,ledger,engine=None):
     state.update(mode='READ_ONLY' if state['hard_read_only'] else 'LIVE',config_path=str(config_path(root)),config_fingerprint=ledger.get('config_fingerprint'),strategy_fingerprint=ledger.get('strategy_fingerprint'),config_warnings=warnings(config),buying_power=obs.get('power'),entry_attempts_remaining=max(0,settings.max_entry_attempts_per_day-daily['attempts']),market_state='OPEN' if session and session.contains(now) else 'CLOSED',entry_start=iso(session.open+timedelta(minutes=session.opening_minutes)) if session else None)
     try:state['watchdog']=json.loads((r/'supervisor-health.json').read_text())
     except (OSError,ValueError):state['watchdog']={}
+    state['system_recovery']=read_hold(r) or dict(state='LEGACY_OR_OPERATOR' if (r/'KILL').exists() else 'NO_HOLD')
     if engine is not None:
         state['position_recovery_policy']=dict(mode=engine.recovery_policy.mode,
             budget_seconds=engine.recovery_policy.budget(config),fingerprint=engine.recovery_policy.fingerprint)
@@ -94,7 +96,10 @@ async def run(root,once=False):
         async def pause(seconds,state):
             if wd['heartbeat_interval_seconds']==5:await pause_monitor(stop,r,seconds,state)
             else:await pause_monitor(stop,r,seconds,state,wd['heartbeat_interval_seconds'])
-        heartbeat(r,'STARTING');ledger.event(engine.now(),'PERSISTENT_WORKER_START',dict(pid=os.getpid(),recovery_policy_fingerprint=engine.recovery_policy.fingerprint,recovery_mode=engine.recovery_policy.mode))
+        generation=os.environ.get('TRADER_WORKER_GENERATION') or str(uuid.uuid4())
+        identity=dict(pid=os.getpid(),generation=generation,supervisor_pid=os.getppid(),started_at=iso(engine.now()))
+        with ledger.tx():ledger.put('worker_identity',identity)
+        heartbeat(r,'STARTING');ledger.event(engine.now(),'PERSISTENT_WORKER_START',dict(**identity,recovery_policy_fingerprint=engine.recovery_policy.fingerprint,recovery_mode=engine.recovery_policy.mode))
         try:
             while not stop.is_set() and not (r/'STOP').exists():
                 broker=None
@@ -117,6 +122,7 @@ async def run(root,once=False):
                                 if active and started-bar_at>=config['market_data']['bars_refresh_seconds']:
                                     bars=await broker.bars(engine.cfg.universe,session,now);bar_at=started
                                 if not active:bars={};tradability={}
+                                await recover_flat(engine,broker,bars,tradability,generation)
                                 await engine.tick(broker,bars,tradability)
                                 if getattr(broker,'cycle_error',None):raise broker.cycle_error
                                 health=ledger.get('health',{})
@@ -125,7 +131,7 @@ async def run(root,once=False):
                                 state=report(root,ledger,engine)
                                 if time.monotonic()-started>wd['cycle_deadline_seconds']:
                                     engine.failure(Unsafe('Monitor cycle exceeded configured deadline'))
-                                    atomic_text(r/'KILL','Monitoring cycle deadline exceeded\n')
+                                    record_hold(r,ledger,'CYCLE_DEADLINE',os.getpid(),generation,engine.now())
                                 if time.monotonic()-good_since>=30:attempt=0
                                 if once:return
                                 await pause(max(.1,(cc['poll_seconds'] if active or warm else cc['idle_poll_seconds'])-(time.monotonic()-started)),'ENTRIES_BLOCKED' if state['blockers'] else 'HEALTHY')
@@ -142,7 +148,13 @@ async def run(root,once=False):
                     attempt+=1;delay=min(cc['position_backoff_max_seconds'] if ledger.trades() else cc['backoff_max_seconds'],cc['backoff_initial_seconds']*2**min(attempt-1,20))
                     ledger.event(engine.now(),'RECONNECT_BACKOFF',dict(attempt=attempt,seconds=delay))
                     await pause(delay,'BACKOFF')
+        except BaseException as exc:
+            from ..diagnostics import exception_record
+            ledger.event(engine.now(),'WORKER_FATAL',dict(pid=os.getpid(),generation=generation,exception=exception_record(exc)))
+            raise
         finally:
+            ledger.event(engine.now(),'WORKER_STOP',dict(pid=os.getpid(),generation=generation,
+                controlled=stop.is_set() or (r/'STOP').exists(),open_positions=len(ledger.trades()),unresolved_orders=len(ledger.orders())))
             heartbeat(r,'STOPPED')
             with ledger.tx():
                 ledger.put('health',dict(at=iso(engine.now()),auth='DISCONNECTED',reconciled=False,data_healthy=False))
@@ -167,7 +179,7 @@ def supervise(root):
     for sig in (signal.SIGTERM,signal.SIGINT):signal.signal(sig,stopping)
     with process_lock(r/'supervisor.lock'):
         atomic_text(r/'supervisor.json',json.dumps(dict(pid=os.getpid(),mode='LIVE',architecture='persistent-v2',started=time.time())))
-        host=None;inhibitor=None;child=None;ledger=Ledger(r/'persistent.sqlite3')
+        host=None;inhibitor=None;child=None;generation=None;last_check=time.time();ledger=Ledger(r/'persistent.sqlite3')
         if sys.platform!='darwin':raise Unsafe('Production host adapter supports macOS only; checks cannot be silently disabled')
         config=apply(root,ledger,datetime.now(UTC));wd=config['watchdog'];cal=Calendar(config)
         ledger.event(datetime.now(UTC),'SUPERVISOR_START',dict(pid=os.getpid(),architecture='persistent-v2'))
@@ -176,15 +188,20 @@ def supervise(root):
                 if host is None or host.poll() is not None:host=subprocess.Popen([sys.executable,'-m','trader.host_health',str(r),str(os.getpid())])
                 if child is None or child.poll() is not None:
                     if child is not None:
-                        atomic_text(r/'KILL','Worker exited; reconciliation/recovery required\n')
+                        record_hold(r,ledger,'WORKER_EXIT',child.pid,generation,datetime.now(UTC),exit_code=child.returncode)
                         ledger.event(datetime.now(UTC),'WORKER_EXIT',dict(pid=child.pid,exit_code=child.returncode))
+                        child=None
+                    if not restart_permitted(r,ledger):
+                        atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='OPERATOR_REQUIRED',sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
+                        time.sleep(wd['check_interval_seconds']);continue
                     recent=restart_history(ledger.get('worker_restarts',[]),time.time(),wd['restart_window_seconds'])
                     if len(recent)>=wd['restart_limit']:
-                        atomic_text(r/'KILL','Watchdog restart budget exhausted; operator recovery required\n')
+                        record_hold(r,ledger,'RESTART_BUDGET_EXHAUSTED',child.pid if child else None,generation,datetime.now(UTC))
                         atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RESTART_LIMIT',sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
                         child=None;time.sleep(wd['check_interval_seconds']);continue
                     with ledger.tx():ledger.put('worker_restarts',recent+[time.time()])
-                    child=subprocess.Popen([sys.executable,'-m','trader','--root',str(root),'run','--mode','LIVE'],cwd=root);born=time.time()
+                    generation=str(uuid.uuid4())
+                    child=subprocess.Popen([sys.executable,'-m','trader','--root',str(root),'run','--mode','LIVE'],cwd=root,env=dict(os.environ,TRADER_WORKER_GENERATION=generation));born=time.time()
                 now=datetime.now(UTC);session=cal.session(now)
                 ledger.checkpoint(session,now)
                 awake=ledger.settings().live_enabled or bool(ledger.trades()) or bool(session and session.open-timedelta(minutes=config['session']['monitor_warmup_minutes'])<=now<session.close+timedelta(minutes=5))
@@ -197,9 +214,10 @@ def supervise(root):
                 except (OSError,ValueError,KeyError):age=time.time()-born
                 deadline=wd['startup_timeout_seconds'] if h.get('state') in ('STARTING','CONNECTING') else wd['restart_after_seconds']
                 if age>deadline:
-                    atomic_text(r/'KILL','Watchdog stalled worker; restart reconciliation required\n')
-                    ledger.event(now,'WATCHDOG_STALL',dict(pid=child.pid,heartbeat_age=age,failure_class='WATCHDOG_RESTART'));child.kill();child.wait()
-                atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RUNNING',worker_pid=child.pid,sleep_prevention=bool(inhibitor and inhibitor.poll() is None),config_fingerprint=fingerprint(config))))
+                    record_hold(r,ledger,'WATCHDOG_STALL',child.pid,generation,now)
+                    ledger.event(now,'WATCHDOG_STALL',dict(pid=child.pid,heartbeat_age=age,supervisor_gap_seconds=time.time()-last_check,worker_generation=generation,failure_class='WATCHDOG_RESTART'));child.kill();child.wait()
+                atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RUNNING',worker_pid=child.pid,worker_generation=generation,sleep_prevention=bool(inhibitor and inhibitor.poll() is None),config_fingerprint=fingerprint(config))))
+                last_check=time.time()
                 time.sleep(wd['check_interval_seconds'])
         finally:
             ledger.close()

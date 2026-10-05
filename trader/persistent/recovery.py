@@ -8,6 +8,7 @@ from datetime import timedelta
 from enum import StrEnum
 import math
 import re
+import socket
 import hashlib
 import json
 from pathlib import Path
@@ -140,6 +141,24 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
     diagnostic['goaway'] = bool(re.search(r'GOAWAY|ConnectionTerminated', messages, re.I))
     match = re.search(r'last_stream_id\s*[:=]\s*(\d+)', messages)
     diagnostic['last_stream_id'] = int(match[1]) if match else None
+    # Subtype is diagnostic, never an authorization to retry a mutation.
+    if kind == Failure.AUTHENTICATION_FAILURE:
+        subtype = 'AUTHENTICATION'
+    elif diagnostic['goaway']:
+        subtype = 'GOAWAY_OR_CONNECTION_TERMINATED'  # Do not assert clean close without an error code.
+    elif any(isinstance(e, socket.gaierror) for e in leaves):
+        subtype = 'DNS_FAILURE'
+    elif any(isinstance(e, (httpx.TimeoutException, TimeoutError)) for e in leaves):
+        subtype = 'TIMEOUT'
+    elif any(isinstance(e, httpx.HTTPStatusError) for e in leaves):
+        subtype = 'HTTP_RESPONSE_FAILURE'
+    elif any(isinstance(e, httpx.RemoteProtocolError) for e in leaves):
+        subtype = 'REMOTE_PROTOCOL_FAILURE'
+    elif any(isinstance(e, httpx.NetworkError) for e in leaves):
+        subtype = 'NETWORK_FAILURE'
+    else:
+        subtype = 'UNKNOWN'
+    diagnostic['transport_kind'] = subtype
     return diagnostic
 
 

@@ -59,7 +59,7 @@ class Coordinator:
         with self.ledger.tx():
             s=self.ledger.ensure_session(day)
             failure=classify(exc,context,repeated=bool(s.get('outage_active')),explicit=explicit)
-            if (s.get('outage_started') and (now-dt(s['outage_started'])).total_seconds()>=self.config['connectivity']['halt_after_seconds']
+            if (s.get('outage_active') and s.get('outage_started') and (now-dt(s['outage_started'])).total_seconds()>=self.config['connectivity']['halt_after_seconds']
                     and failure['failure_class'] in (Failure.TRANSIENT_READ_TRANSPORT_FAILURE,Failure.REPEATED_BROKER_COMMUNICATION_FAILURE)):
                 failure['cause_failure_class']=failure['failure_class']
                 failure['failure_class']=Failure.PROLONGED_CONNECTIVITY_LOSS.value
@@ -108,7 +108,7 @@ class Coordinator:
                         if not c.get('opening_high'):raise Unsafe('Opening range incomplete')
                         valid_quote(quotes[sym],now,self.cfg)
                     if not s['opening_healthy']:
-                        s.update(opening_healthy=True,opening_checked_at=iso(now))
+                        s.update(opening_healthy=True,opening_checked_at=iso(now),opening_reason=None)
                         self.ledger.event(now,'OPENING_EQUIVALENT_HEALTH_PASSED',dict(day=day,at=iso(now),recovered_check=now>session.open+timedelta(minutes=16)))
                 except (Unsafe,KeyError,ValueError) as exc:
                     s['opening_reason']=str(exc)
