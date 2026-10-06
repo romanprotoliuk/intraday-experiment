@@ -8,6 +8,8 @@ from pathlib import Path
 import time
 import uuid
 import re
+import fcntl
+import tempfile
 from urllib.parse import parse_qs, urlparse
 import httpx
 from mcp import ClientSession
@@ -85,29 +87,44 @@ class TokenFile:
     def read(self):
         if not self.path.exists():
             return {}
-        if self.path.stat().st_mode & 0o077:
-            raise Unsafe("OAuth file permissions must be 0600")
-        return json.loads(self.path.read_text())
+        fd=os.open(self.path,os.O_RDONLY|os.O_NOFOLLOW)
+        with os.fdopen(fd) as stream:
+            if os.fstat(stream.fileno()).st_mode & 0o077:
+                raise Unsafe("OAuth file permissions must be 0600")
+            return json.load(stream)
 
     def write(self, key, value):
-        data = self.read()
-        data[key] = value.model_dump(mode="json")
+        self.write_fields(**{key:value.model_dump(mode="json")})
+
+    def write_fields(self, **fields):
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        temp = self.path.with_suffix(".tmp")
-        fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        os.chmod(temp, 0o600)
-        with os.fdopen(fd, "w") as f:
-            json.dump(data, f)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(temp, self.path)
+        lock=os.open(self.path.with_suffix('.storage.lock'),os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
+        try:
+            try:fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            except BlockingIOError:raise Unsafe('OAuth storage update already in progress') from None
+            data=self.read();data.update(fields)
+            fd,temp=tempfile.mkstemp(prefix='.oauth-',dir=self.path.parent)
+            try:
+                with os.fdopen(fd,'w') as f:
+                    json.dump(data,f);f.flush();os.fsync(f.fileno())
+                os.replace(temp,self.path)
+                directory=os.open(self.path.parent,os.O_RDONLY)
+                try:os.fsync(directory)
+                finally:os.close(directory)
+            finally:
+                if os.path.exists(temp):os.unlink(temp)
+        finally:os.close(lock)
 
     async def get_tokens(self):
         value = self.read().get("tokens")
         return OAuthToken.model_validate(value) if value else None
 
     async def set_tokens(self, value):
-        self.write("tokens", value)
+        from .oauth_refresh import token_digest
+        saved=time.time()
+        self.write_fields(tokens=value.model_dump(mode='json'),refresh_failure=None,refresh_verified={},
+            token_timing=dict(saved_at=saved,expires_at=saved+value.expires_in if value.expires_in else None,
+                              access_digest=token_digest(value)))
 
     async def get_client_info(self):
         value = self.read().get("client")
@@ -160,7 +177,9 @@ async def connect(token_path, interactive=False):
     storage = TokenFile(token_path)
     if not interactive and not await storage.get_tokens():
         raise Unsafe("No standalone Robinhood credentials. Run: python -m trader auth")
-    auth = OAuthClientProvider(
+    from .oauth_refresh import UnattendedOAuth
+    provider=OAuthClientProvider if interactive else UnattendedOAuth
+    auth = provider(
         server_url=ENDPOINT,
         client_metadata=OAuthClientMetadata(client_name="Intraday Research", redirect_uris=["http://127.0.0.1:8765/callback"], grant_types=["authorization_code", "refresh_token"], response_types=["code"]),
         storage=storage, redirect_handler=redirect, callback_handler=callback)

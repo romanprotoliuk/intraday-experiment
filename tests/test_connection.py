@@ -5,7 +5,7 @@ import json
 from types import SimpleNamespace
 import httpx
 import pytest
-from mcp.shared.auth import OAuthToken
+from mcp.shared.auth import OAuthToken, OAuthClientInformationFull
 from mcp.shared.exceptions import McpError
 from trader import broker as module
 from trader.broker import READ_TOOLS, TokenFile, connect, discover_tools, failure_types
@@ -15,9 +15,16 @@ from trader.models import Unsafe
 @pytest.fixture
 def wire(tmp_path, monkeypatch):
     path = tmp_path/'oauth.json'
-    TokenFile(path).write('tokens', OAuthToken(access_token='test-only',token_type='Bearer'))
-    state = SimpleNamespace(calls=[], clients=[], discovery_delay=0, drop_account=False, missing=False)
+    asyncio.run(TokenFile(path).set_tokens(OAuthToken(access_token='test-only',token_type='Bearer',expires_in=3600)))
+    state = SimpleNamespace(calls=[], clients=[], discovery_delay=0, drop_account=False, missing=False,refreshes=0)
     async def handle(request):
+        if 'oauth-protected-resource' in request.url.path:
+            return httpx.Response(200,json={'resource':module.ENDPOINT,'authorization_servers':['https://auth.example']})
+        if 'oauth-authorization-server' in request.url.path:
+            return httpx.Response(200,json={'issuer':'https://auth.example','authorization_endpoint':'https://auth.example/authorize','token_endpoint':'https://auth.example/token','response_types_supported':['code']})
+        if request.url.host=='auth.example' and request.url.path=='/token':
+            state.refreshes+=1
+            return httpx.Response(200,json={'access_token':'synthetic-rotated','refresh_token':'synthetic-next-refresh','token_type':'Bearer','expires_in':3600})
         if request.method == 'GET':
             return httpx.Response(405)
         assert request.method == 'POST', 'No DELETE or other method expected'
@@ -65,6 +72,21 @@ def test_discover_before_call_and_noninteractive_reconnect(wire):
             assert state.clients[-1].is_closed
     asyncio.run(run())
     assert state.calls == ['initialize','notifications/initialized','tools/list','tools/call']*2
+
+
+def test_real_sdk_expired_credentials_refresh_then_two_clean_connections(wire):
+    path,state=wire;storage=TokenFile(path)
+    asyncio.run(storage.set_client_info(OAuthClientInformationFull(client_id='synthetic-client',issuer='https://auth.example',redirect_uris=['http://localhost/callback'])))
+    asyncio.run(storage.set_tokens(OAuthToken(access_token='synthetic-old',refresh_token='synthetic-refresh',token_type='Bearer',expires_in=3600)))
+    storage.write_fields(token_timing={})
+    async def run():
+        for _ in range(2):
+            async with connect(path) as broker:
+                assert broker.live_guard is None and broker.cancel_guard is None
+                assert await broker.call('get_accounts',{})=={'accounts':[]}
+    asyncio.run(run())
+    assert state.refreshes==1 and state.calls.count('initialize')==2
+    assert all(c.is_closed for c in state.clients)
 
 
 def test_timeout_does_not_retry_or_break_clean_teardown(wire, caplog):
