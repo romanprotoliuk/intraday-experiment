@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import json
 import os
+import platform
 from pathlib import Path
 import plistlib
 import subprocess
@@ -44,6 +45,9 @@ async def control_snapshot(root, *, now=None, broker_check=True):
     try:
         config=C.load(root);result['config_fingerprint']=C.fingerprint(config)
         result['strategy_fingerprint']=C.strategy_fingerprint(config)
+        check('platform',platform.system()=='Darwin')
+        check('config_permissions',C.path(root).stat().st_mode&0o077==0)
+        check('runtime_permissions',r.stat().st_mode&0o077==0)
         db=read_db(root)
         try:
             check('database',db.execute('PRAGMA quick_check').fetchone()[0]=='ok')
@@ -114,14 +118,15 @@ async def control_snapshot(root, *, now=None, broker_check=True):
 def summarize(snapshot, *, controls, auth, reset_valid, next_session_info, recovery_class):
     """Pure readiness policy; no mutation capability and no broker entry permission."""
     checks=snapshot['checks']
-    infra=('database','configuration','strategy','risk','ownership','heartbeat','watchdog','processes','launchagent','host_clock','ac_power')
+    infra=('platform','config_permissions','runtime_permissions','database','configuration','strategy','risk','ownership','heartbeat','watchdog','processes','launchagent','host_clock','ac_power')
     infrastructure=all(checks.get(k) is True for k in infra)
     monitoring=infrastructure and checks.get('broker') is True and checks.get('worker_auth') is True
     reasons=[k+' failed/unavailable' for k,v in checks.items() if v is not True]
     for k in (*infra,'broker','worker_auth','local_flat','worker_stable','quiet_period','no_other_control'):
         if k not in checks:reasons.append(k+' evidence missing')
     if not snapshot.get('live_enabled'):reasons.append('Persistent LIVE disabled')
-    if controls:reasons.append('Persistent control requires resolution: '+','.join(controls))
+    manual_controls=[control for control in controls if not (control=='KILL' and recovery_class=='B')]
+    if manual_controls:reasons.append('Persistent control requires resolution: '+','.join(manual_controls))
     if not auth.get('expiry_known') or not (auth.get('covers_session') or auth.get('refresh_proven')):
         reasons.append('Authentication lifetime/refresh through next session not proven')
     if not all(auth.get(k) for k in ('refresh_present','client_present','refresh_proven')) or auth.get('refresh_blocked'):
@@ -132,6 +137,7 @@ def summarize(snapshot, *, controls, auth, reset_valid, next_session_info, recov
     return dict(INFRASTRUCTURE_READY=infrastructure,MONITORING_READY=monitoring,
                 UNATTENDED_LIVE_READY=unattended,operator_action_required=reasons,
                 next_session=next_session_info,token_refresh_health=auth,recovery_class=recovery_class,
+                automatic_recovery_pending=recovery_class=='B' and 'KILL' in controls,
                 entry_eligible_now=False,
                 note='Readiness describes known prerequisites, not permission, a trade guarantee, or future health certification')
 

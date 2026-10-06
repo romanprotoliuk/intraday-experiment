@@ -21,6 +21,7 @@ from test_persistent import env, tick, raw, eligible_symbols
 @pytest.fixture
 def maintenance(recovery,monkeypatch):
     e,b,db,hold,obs=recovery
+    e.runtime.chmod(0o700)
     b.time=e.session().open-timedelta(hours=2)
     atomic_text(e.runtime/'KILL',L.TARGET+'\n')
     db.put('system_hold',None);db.put('system_recovery_budget',{})
@@ -35,6 +36,7 @@ def maintenance(recovery,monkeypatch):
     async def connection(path,*args,**kwargs):
         assert path==e.runtime/'oauth.json';calls.append(1);yield b
     monkeypatch.setattr(R,'connect',connection)
+    monkeypatch.setattr(R.platform,'system',lambda:'Darwin')
     monkeypatch.setattr(R,'launchagent_running',lambda pid:pid==9)
     monkeypatch.setattr(R.os,'kill',lambda pid,sig:None if sig==0 and pid in (1,9) else (_ for _ in ()).throw(ProcessLookupError()))
     yield e,b,db,event_id,calls
@@ -73,7 +75,7 @@ def test_outside_session_acknowledgment_does_not_make_entries_eligible(maintenan
     with pytest.raises(Unsafe,match='entry window'):e.health_check(b.time)
 
 
-@pytest.mark.parametrize('fault',['account','positions','orders','auth','clock','host','heartbeat','watchdog','generation','database','config','strategy','unresolved','budget','new_failure','evidence_changed','quiet_period','worker_stable'])
+@pytest.mark.parametrize('fault',['account','positions','orders','auth','clock','host','heartbeat','watchdog','generation','database','config','strategy','unresolved','budget','new_failure','evidence_changed','quiet_period','worker_stable','config_permissions','runtime_permissions'])
 def test_any_uncertain_proof_blocks_legacy_acknowledgment(maintenance,fault):
     e,b,db,eid,calls=maintenance;record=reviewed(maintenance)
     if fault in ('account','positions','orders','auth'):
@@ -95,6 +97,8 @@ def test_any_uncertain_proof_blocks_legacy_acknowledgment(maintenance,fault):
     elif fault in ('generation','worker_stable'):
         v=db.get('worker_identity');v.update({'generation':'wrong'} if fault=='generation' else {'started_at':iso(b.time)});db.put('worker_identity',v)
     elif fault=='database':db.db.execute('drop table trades')
+    elif fault=='config_permissions':C.path(e.root).chmod(0o644)
+    elif fault=='runtime_permissions':e.runtime.chmod(0o755)
     elif fault in ('config','strategy'):
         c=deepcopy(e.config)
         if fault=='config':c['trading']['capital_per_trade']='9'
@@ -243,6 +247,16 @@ def test_sufficient_readiness_proof_is_distinct_from_entry_permission(maintenanc
     proof=asyncio.run(R.control_snapshot(e.root,now=lambda:b.time))
     result=R.summarize(proof,controls=[],auth={'covers_session':True,'expiry_known':True,'refresh_present':True,'client_present':True,'refresh_proven':True},reset_valid=True,next_session_info={},recovery_class='NORMAL')
     assert result['UNATTENDED_LIVE_READY'] and not result['entry_eligible_now']
+
+
+def test_known_structured_recovery_is_not_reported_as_operator_required(maintenance):
+    e,b,db,_,_=maintenance
+    proof=asyncio.run(R.control_snapshot(e.root,now=lambda:b.time))
+    auth={'covers_session':True,'expiry_known':True,'refresh_present':True,'client_present':True,'refresh_proven':True}
+    result=R.summarize(proof,controls=['KILL'],auth=auth,reset_valid=True,next_session_info={},recovery_class='B')
+    assert result['UNATTENDED_LIVE_READY'] and result['automatic_recovery_pending']
+    assert not result['operator_action_required'] and not result['entry_eligible_now']
+    assert (e.runtime/'KILL').exists() and not b.calls
 
 
 @pytest.mark.parametrize('fault',['expiry','refresh','reset','permission','unknown_recovery'])

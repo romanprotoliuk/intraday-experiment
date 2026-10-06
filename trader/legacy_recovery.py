@@ -128,9 +128,11 @@ def review(root,event_ids,expected_target,*,investigated=False,now=None):
 def require_proof(root,ledger,review_record,proof,clock,transition_text=None):
     now=clock();outside_session(root,now)
     if ledger.get(KEY)!=review_record or not valid_review(root,ledger.db,review_record,now):raise Unsafe('Incident review invalid or replaced')
-    required={'database','configuration','strategy','risk','local_flat','ownership','worker_stable','quiet_period','heartbeat','watchdog','processes','launchagent','host_clock','ac_power','broker','worker_auth'}
+    required={'platform','config_permissions','runtime_permissions','database','configuration','strategy','risk','local_flat','ownership','worker_stable','quiet_period','heartbeat','watchdog','processes','launchagent','host_clock','ac_power','broker','worker_auth'}
     if not all(proof.get('checks',{}).get(k) is True for k in required):raise Unsafe('Control-plane proof incomplete')
     config=C.assert_current(root,ledger)
+    if C.path(root).stat().st_mode&0o077 or (Path(root)/'runtime').stat().st_mode&0o077:
+        raise Unsafe('Protected configuration/runtime permissions changed')
     if not 0<=(now-dt(proof['broker']['observed_at'])).total_seconds()<=config['execution']['preflight_max_age_seconds']:raise Unsafe('Broker proof stale')
     if ledger.trades() or ledger.orders():raise Unsafe('Local positions or orders appeared')
     if ledger.get('worker_identity',{}).get('generation')!=proof.get('generation'):raise Unsafe('Worker generation changed')

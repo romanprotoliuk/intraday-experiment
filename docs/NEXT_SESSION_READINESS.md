@@ -21,6 +21,9 @@ stable ownership, a quiet recovery period, existing LIVE permission, no unresolv
 operator controls, valid next-session initial state, and demonstrated unattended
 refresh for the stored credential. A refresh token's existence alone is not
 proof. A current explicit/legacy hold keeps live readiness false.
+An exact class B hold with complete current control evidence is instead reported
+as `automatic_recovery_pending`; its future data/opening proof remains mandatory,
+but it does not by itself claim that an operator must return during the session.
 
 All three values describe a snapshot. They are not promises about future network,
 broker, token-revocation or host conditions. Entry permission still comes only
@@ -119,6 +122,9 @@ After refresh, only a fresh MCP initialization can continue. An established
 connection is closed so the normal Coordinator account-pinning/reconciliation
 sequence runs again. Broker mutations are never replayed after 401; mutation
 ambiguity continues through the existing durable order reconciliation path.
+The existing conservative position-recovery policy can seek an exit after such
+an interruption; refreshing authentication does not suspend stop/time/EOD rules
+or override the existing policy for a held position.
 Interactive authorization remains an explicitly invoked command and is never
 opened by the service. No response body, credential or auth header is logged.
 
