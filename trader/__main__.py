@@ -35,6 +35,11 @@ def main():
     p=subs.add_parser('production');p.add_argument('action',choices=['check','activate']);p.add_argument('--acknowledge-risk',action='store_true');p.add_argument('--recover-kill',action='store_true')
     p=subs.add_parser('launchagent');p.add_argument('action',choices=['generate']);p.add_argument('--output',type=Path)
     p=subs.add_parser('clock-diagnostics');p.add_argument('--samples',type=int,default=10);p.add_argument('--interval',type=int,default=10)
+    p=subs.add_parser('readiness');p.add_argument('action',choices=['next-session']);p.add_argument('--no-broker',action='store_true')
+    p=subs.add_parser('session-forensics');p.add_argument('--date',required=True)
+    p=subs.add_parser('legacy-incident');p.add_argument('action',choices=['inspect','review','acknowledge'])
+    p.add_argument('--target-identity',type=Path);p.add_argument('--event-id',action='append',type=int)
+    p.add_argument('--review-id');p.add_argument('--investigation-complete',action='store_true');p.add_argument('--acknowledge',action='store_true')
     p=subs.add_parser('stop')
     p=subs.add_parser("live")
     p.add_argument("action",choices=["enable","disable"])
@@ -54,6 +59,22 @@ def main():
     args = parser.parse_args()
     root = args.root.resolve()
     runtime = root / "runtime"
+    # Inspection must not initialize/chmod a missing production runtime or DB.
+    if args.command in ('readiness','session-forensics'):
+        if args.command=='readiness':
+            from .readiness import certify
+            result=asyncio.run(certify(root,broker_check=not args.no_broker));print(json.dumps(result,indent=2))
+            raise SystemExit(0 if result['UNATTENDED_LIVE_READY'] else 1)
+        from .session_forensics import reconstruct
+        print(json.dumps(reconstruct(root,args.date),indent=2));return
+    if args.command=='legacy-incident':
+        from .legacy_recovery import hold_identity,review,acknowledge
+        if args.action=='inspect':print(json.dumps(hold_identity(runtime),indent=2));return
+        if args.action=='review':
+            if not args.target_identity:parser.error('--target-identity required')
+            result=review(root,args.event_id,json.loads(args.target_identity.read_text()),investigated=args.investigation_complete)
+            print(json.dumps({k:result[k] for k in ('id','status','expires_at')}));return
+        print(json.dumps(asyncio.run(acknowledge(root,args.review_id,acknowledge=args.acknowledge))));return
     runtime.mkdir(parents=True, exist_ok=True)
     runtime.chmod(0o700)
     try:

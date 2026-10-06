@@ -11,6 +11,29 @@ TERMINAL={'FILLED','CANCELLED','REJECTED','ABORTED'}
 ACTIVE=('RESERVED','DISPATCHING','SUBMITTED','PARTIAL','AMBIGUOUS')
 
 class Ledger:
+    @classmethod
+    def existing(cls,path):
+        """Control transitions must never initialize or repair production state."""
+        path=Path(path)
+        if not path.is_file() or path.is_symlink():raise Unsafe('Existing production database required')
+        obj=cls.__new__(cls)
+        obj.db=sqlite3.connect(f'file:{path}?mode=rw',uri=True,timeout=10,isolation_level=None)
+        obj.db.row_factory=sqlite3.Row
+        try:
+            obj.db.execute('PRAGMA synchronous=FULL')
+            if obj.db.execute('PRAGMA quick_check').fetchone()[0]!='ok':raise Unsafe('Database integrity failed')
+            required={'kv':('key','value'),'sessions':('day','data'),'trades':('id','symbol','day','status','data'),
+                'orders':('id','intent_key','trade_id','side','status','broker_id','data'),'fills':('id','order_id','data'),
+                'events':('id','at','kind','data')}
+            for table,columns in required.items():
+                obj.db.execute('SELECT '+','.join(columns)+' FROM '+table+' LIMIT 0')
+            if not all(obj.get(k) for k in ('settings','production_config','account_number','strategy_fingerprint','config_fingerprint')):
+                raise Unsafe('Required production state missing')
+            obj.settings()
+            return obj
+        except BaseException:
+            obj.db.close();raise
+
     def __init__(self,path):
         Path(path).parent.mkdir(parents=True,exist_ok=True)
         self.db=sqlite3.connect(path,timeout=10,isolation_level=None)
