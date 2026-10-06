@@ -43,7 +43,7 @@ class Coordinator:
         if not session.entry_window(now):raise Unsafe('Outside strategy entry window')
         for marker in ('KILL','MAINTENANCE','ENTRIES_DISABLED','LIQUIDATE','TRANSITION'):
             if (self.runtime/marker).exists():raise Unsafe('Entry block: '+marker)
-        require_host(self.runtime,now)
+        require_host(self.runtime,self.now)
         h=json.loads((self.runtime/'heartbeat.json').read_text())
         if not 0<=now.timestamp()-h['at']<=self.config['watchdog']['heartbeat_stale_seconds'] or h['state'] in ('STOPPED','DISCONNECTED','BACKOFF'):raise Unsafe('Monitor heartbeat unhealthy')
         s=self.ledger.session(session.day)
@@ -102,7 +102,7 @@ class Coordinator:
             else:s.update(recovery_active=True,successes=0,stable_since=iso(now))
             if session and session.entry_window(now) and data_healthy and not s['recovery_active'] and not s['connectivity_halt']:
                 try:
-                    require_host(self.runtime,now)
+                    require_host(self.runtime,self.now)
                     for sym in self.cfg.universe:
                         c=evaluate(sym,bars.get(sym,[]),session,now,self.cfg)
                         if not c.get('opening_high'):raise Unsafe('Opening range incomplete')
@@ -266,7 +266,7 @@ class Coordinator:
             sup=json.loads((self.runtime/'supervisor-health.json').read_text())
             proof['worker_healthy']=0<=now.timestamp()-h['at']<=self.config['watchdog']['heartbeat_stale_seconds'] and h['state'] in ('POLLING','HEALTHY','ENTRIES_BLOCKED')
             proof['watchdog_healthy']=sup['state']=='RUNNING' and sup['worker_pid']==h['pid'] and 0<=now.timestamp()-sup['at']<=self.config['host']['health_max_age_seconds']
-            require_host(self.runtime,now)
+            require_host(self.runtime,self.now)
             proof['clock_healthy']=True
         except (Unsafe,OSError,ValueError,KeyError,TypeError):
             fresh=False

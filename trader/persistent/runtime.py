@@ -22,7 +22,7 @@ def report(root,ledger,engine=None):
     daily=ledger.session(day) or dict(loss_budget=str(settings.daily_loss),gross_losses='0',net='0',attempts=0,completed=0,opening_healthy=False,recovery_active=True)
     health=ledger.get('health',{});obs=ledger.get('observation',{});positions=ledger.trades();orders=ledger.orders()
     from ..models import D,valid_quote
-    try:host=json.loads((r/'host-health.json').read_text());host_errors=host_problems(host,now,config if ledger.get('production_config') else None)
+    try:host=json.loads((r/'host-health.json').read_text());host_errors=host_problems(host,datetime.now(UTC) if engine is None else engine.now(),config if ledger.get('production_config') else None)
     except (OSError,ValueError):host={};host_errors=['Host health unavailable']
     try:h=json.loads((r/'heartbeat.json').read_text());heartbeat_age=now.timestamp()-h['at']
     except (OSError,ValueError,KeyError):h={};heartbeat_age=None
@@ -192,12 +192,12 @@ def supervise(root):
                         ledger.event(datetime.now(UTC),'WORKER_EXIT',dict(pid=child.pid,exit_code=child.returncode))
                         child=None
                     if not restart_permitted(r,ledger):
-                        atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='OPERATOR_REQUIRED',sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
+                        atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='OPERATOR_REQUIRED',inhibitor_pid=inhibitor.pid if inhibitor and inhibitor.poll() is None else None,sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
                         time.sleep(wd['check_interval_seconds']);continue
                     recent=restart_history(ledger.get('worker_restarts',[]),time.time(),wd['restart_window_seconds'])
                     if len(recent)>=wd['restart_limit']:
                         record_hold(r,ledger,'RESTART_BUDGET_EXHAUSTED',child.pid if child else None,generation,datetime.now(UTC))
-                        atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RESTART_LIMIT',sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
+                        atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RESTART_LIMIT',inhibitor_pid=inhibitor.pid if inhibitor and inhibitor.poll() is None else None,sleep_prevention=bool(inhibitor and inhibitor.poll() is None))))
                         child=None;time.sleep(wd['check_interval_seconds']);continue
                     with ledger.tx():ledger.put('worker_restarts',recent+[time.time()])
                     generation=str(uuid.uuid4())
@@ -216,7 +216,7 @@ def supervise(root):
                 if age>deadline:
                     record_hold(r,ledger,'WATCHDOG_STALL',child.pid,generation,now)
                     ledger.event(now,'WATCHDOG_STALL',dict(pid=child.pid,heartbeat_age=age,supervisor_gap_seconds=time.time()-last_check,worker_generation=generation,failure_class='WATCHDOG_RESTART'));child.kill();child.wait()
-                atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RUNNING',worker_pid=child.pid,worker_generation=generation,sleep_prevention=bool(inhibitor and inhibitor.poll() is None),config_fingerprint=fingerprint(config))))
+                atomic_text(r/'supervisor-health.json',json.dumps(dict(pid=os.getpid(),at=time.time(),state='RUNNING',worker_pid=child.pid,worker_generation=generation,inhibitor_pid=inhibitor.pid if inhibitor and inhibitor.poll() is None else None,sleep_prevention=bool(inhibitor and inhibitor.poll() is None),config_fingerprint=fingerprint(config))))
                 last_check=time.time()
                 time.sleep(wd['check_interval_seconds'])
         finally:

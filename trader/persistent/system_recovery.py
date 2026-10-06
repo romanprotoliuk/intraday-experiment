@@ -150,7 +150,7 @@ def prove_flat(engine, record, obs, generation):
             and dt(worker['started_at']) >= dt(record['updated_at'])
             and generation != record['worker_generation'] and worker.get('pid') != record.get('worker_pid'))
         checks['episode_time'] = dt(record['created_at']) <= dt(record['updated_at']) <= now
-        require_host(r, now); checks['clock_host'] = True
+        require_host(r, engine.now); checks['clock_host'] = True
         session = engine.session(); daily = ledger.session(session.day) if session else None
         checks['session'] = bool(session and session.entry_window(now) and daily and daily.get('day') == session.day)
         checks['connectivity'] = bool(daily and daily.get('recovery_active') is False and daily.get('connectivity_halt') is False)

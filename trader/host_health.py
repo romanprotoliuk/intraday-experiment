@@ -19,6 +19,46 @@ MAX_HOST_AGE = 15
 MIN_BATTERY_PERCENT = 50
 
 
+def sleep_assertions(output, inhibitor_pid, supervisor_pid):
+    """Verify our child's assertions, never another app's system-wide totals."""
+    found = set()
+    if type(inhibitor_pid) is not int or type(supervisor_pid) is not int:
+        return False
+    for block in re.split(r'(?=^\s*pid \d+\()', output, flags=re.M):
+        if not re.match(r'\s*pid '+str(inhibitor_pid)+r'\(caffeinate\):', block):
+            continue
+        if not re.search(r'Created for PID:\s*'+str(supervisor_pid)+r'\.', block):
+            continue
+        first = block.splitlines()[0]
+        for name in ('PreventSystemSleep', 'PreventUserIdleSystemSleep'):
+            if re.search(r'\b'+name+r'\b', first):found.add(name)
+    return found == {'PreventSystemSleep', 'PreventUserIdleSystemSleep'}
+
+
+class Continuity:
+    """Invalidate cached evidence after suspension, stalls or wall-clock steps.
+
+    Bounds reuse the existing host freshness and combined clock-error limits.
+    No timestamp tolerance is added. Monotonic time is process-local evidence.
+    """
+    def __init__(self, config):
+        self.previous = None
+        self.generation = 0
+        self.max_gap = config.get('host', {}).get('health_max_age_seconds', MAX_HOST_AGE)
+        self.max_step = float(config.get('clock', {}).get('max_combined_bound_ms', '50'))/1000
+
+    def observe(self, wall, monotonic):
+        changed = False
+        if self.previous is not None:
+            w = (wall-self.previous[0]).total_seconds()
+            m = monotonic-self.previous[1]
+            changed = (not math.isfinite(m) or m < 0 or w < 0 or
+                       max(w, m) > self.max_gap or abs(w-m) > self.max_step)
+            if changed:self.generation += 1
+        self.previous = (wall, monotonic)
+        return changed
+
+
 def parse_power(output):
     sources = re.findall(r"^Now drawing from '(AC Power|Battery Power)'$", output, re.M)
     source = sources[0] if len(sources) == 1 else None
@@ -53,9 +93,16 @@ def problems(record, now, config=None):
         if type(percent) is not int or not host.get('min_battery_percent',MIN_BATTERY_PERCENT) <= percent <= 100:
             errors.append('Verified battery at least '+str(host.get('min_battery_percent',MIN_BATTERY_PERCENT))+'% required for new entries')
         if host.get('require_ac_power',False) and record.get('ac_power') is not True: errors.append('AC power required')
+        # caffeinate -s only protects system sleep on AC. Battery percentage
+        # cannot certify unattended availability, even when -i is active.
+        if host.get('require_sleep_prevention',False) and record.get('ac_power') is not True:
+            errors.append('AC power required for verified system sleep prevention')
         if host.get('require_sleep_prevention',False) and record.get('sleep_prevention') is not True: errors.append('Verified sleep prevention required')
+        if record.get('collection_valid') is False:errors.append('Host collection interrupted; fresh evidence required')
         if host.get('require_lid_open',True) and record.get('lid_open') is not True: errors.append('Lid must be open')
         c = record['clock']
+        if 'continuity_generation' in record and c.get('continuity_generation') != record['continuity_generation']:
+            errors.append('Clock measurement predates host continuity change')
         if not 0 <= (now-dt(c['at'])).total_seconds() <= clock.get('sample_max_age_seconds',MAX_CLOCK_AGE):
             errors.append('Clock measurement stale or future')
         offset, uncertainty = float(c['offset_seconds']), float(c['uncertainty_seconds'])
@@ -67,12 +114,20 @@ def problems(record, now, config=None):
 
 
 def require_host(runtime, now=None):
-    now = now or datetime.now(UTC)
     try:
         record = json.loads((Path(runtime)/'host-health.json').read_text())
         supervisor = json.loads((Path(runtime)/'supervisor.json').read_text())
         config = active_config(Path(runtime))
-        errors = problems(record, now, config)
+        # Read evidence BEFORE sampling the validation clock. Callers with an
+        # injected clock pass the callable, not a pre-read datetime snapshot.
+        checked_at = now() if callable(now) else now if now is not None else datetime.now(UTC)
+        errors = problems(record, checked_at, config)
+        if 'monotonic_at' in record:
+            elapsed = time.monotonic()-float(record['monotonic_at'])
+            wall_elapsed = (checked_at-dt(record['at'])).total_seconds()
+            bound = float((config or {}).get('clock',{}).get('max_combined_bound_ms','50'))/1000
+            if not math.isfinite(elapsed) or elapsed < 0 or abs(elapsed-wall_elapsed)>bound:
+                errors.append('Host clock continuity changed; fresh observation required')
         if config:
             from .configuration import fingerprint
             if record.get('config_fingerprint')!=fingerprint(config):errors.append('Host configuration fingerprint mismatch')
@@ -116,38 +171,54 @@ async def monitor(runtime, supervisor_pid):
     if config:
         from .configuration import fingerprint
         record['config_fingerprint']=fingerprint(config)
-    async def clock_loop():
-        while not stop.is_set():
-            try:
-                # Query only: intentionally no -s/-S clock-setting flag.
-                output = await command('/usr/bin/sntp', '-t', str(clock.get('sample_timeout_seconds',2)), 'time.apple.com', timeout=max(10,clock.get('sample_timeout_seconds',2)+5))
-                record['clock'] = dict(at=iso(datetime.now(UTC)), **parse_ntp(output))
-            except Exception as exc:
-                record['clock'] = dict(error=str(exc))
-            try: await asyncio.wait_for(stop.wait(), clock.get('sample_interval_seconds',60))
-            except TimeoutError: pass
-    task = asyncio.create_task(clock_loop())
+    continuity = Continuity(config or {})
+    while not stop.is_set() and os.getppid() == supervisor_pid:
+        await collect(runtime, supervisor_pid, config or {}, record, continuity)
+        atomic_text(runtime/'host-health.json', json.dumps(record, indent=2))
+        try: await asyncio.wait_for(stop.wait(), host.get('poll_seconds',5))
+        except TimeoutError: pass
+
+
+async def collect(runtime, supervisor_pid, config, record, continuity,
+                  wall=lambda: datetime.now(UTC), monotonic=time.monotonic):
+    """One bounded, read-only host/clock observation; injectable for fault tests."""
+    host=config.get('host',{});clock=config.get('clock',{})
+    started=wall();started_mono=monotonic()
+    if continuity.observe(started,started_mono):record['clock']={}
+    generation=continuity.generation
+    record.update(at=iso(started),monotonic_at=started_mono,collection_valid=False,
+                  continuity_generation=generation,sleep_prevention=False)
     try:
-        while not stop.is_set() and os.getppid() == supervisor_pid:
-            try:
-                power, lid = await asyncio.gather(command('/usr/bin/pmset','-g','batt'), command('/usr/sbin/ioreg','-r','-k','AppleClamshellState','-d','4'))
-                record.update(**parse_power(power),
-                              lid_open=bool(re.search(r'"AppleClamshellState"\s*=\s*No\b', lid)))
-            except Exception as exc:
-                record.update(ac_power=None, battery_percent=None, lid_open=None, observation_error=str(exc))
-            if config:
-                try:
-                    evidence=json.loads((runtime/'supervisor-health.json').read_text())
-                    record['sleep_prevention']=bool(evidence['sleep_prevention'] and evidence['pid']==supervisor_pid and 0<=time.time()-evidence['at']<=host.get('health_max_age_seconds',15))
-                except (OSError,ValueError,KeyError):record['sleep_prevention']=False
-            now = datetime.now(UTC); record['at'] = iso(now)
-            record['problems'] = problems(record, now, config); record['healthy'] = not record['problems']
-            atomic_text(runtime/'host-health.json', json.dumps(record, indent=2))
-            try: await asyncio.wait_for(stop.wait(), host.get('poll_seconds',5))
-            except TimeoutError: pass
-    finally:
-        task.cancel()
-        await asyncio.gather(task, return_exceptions=True)
+        power,lid,assertions=await asyncio.gather(
+            command('/usr/bin/pmset','-g','batt'),
+            command('/usr/sbin/ioreg','-r','-k','AppleClamshellState','-d','4'),
+            command('/usr/bin/pmset','-g','assertions'))
+        record.update(**parse_power(power),lid_open=bool(re.search(r'"AppleClamshellState"\s*=\s*No\b',lid)))
+        evidence=json.loads((Path(runtime)/'supervisor-health.json').read_text())
+        record['sleep_prevention']=bool(evidence.get('sleep_prevention') is True and
+            evidence['pid']==supervisor_pid and
+            0<=wall().timestamp()-evidence['at']<=host.get('health_max_age_seconds',MAX_HOST_AGE) and
+            sleep_assertions(assertions,evidence.get('inhibitor_pid'),supervisor_pid))
+        record.pop('observation_error',None)
+    except Exception as exc:
+        record.update(ac_power=None,battery_percent=None,lid_open=None,observation_error=type(exc).__name__)
+    if continuity.observe(wall(),monotonic()):record['clock']={}
+    cached=record.get('clock',{})
+    if (cached.get('continuity_generation')!=continuity.generation or not cached.get('at') or
+            not 0<=(wall()-dt(cached['at'])).total_seconds()<clock.get('sample_interval_seconds',60)):
+        sample_start=wall();sample_generation=continuity.generation
+        try:
+            output=await command('/usr/bin/sntp','-t',str(clock.get('sample_timeout_seconds',2)),
+                'time.apple.com',timeout=max(10,clock.get('sample_timeout_seconds',2)+5))
+            continuity.observe(wall(),monotonic())
+            if continuity.generation!=sample_generation:raise Unsafe('Clock collection interrupted')
+            record['clock']=dict(at=iso(sample_start),continuity_generation=sample_generation,**parse_ntp(output))
+        except Exception as exc:record['clock']=dict(error=type(exc).__name__)
+    continuity.observe(wall(),monotonic())
+    record['collection_valid']=continuity.generation==generation
+    record['continuity_generation']=continuity.generation
+    if not record['collection_valid']:record['clock']={}
+    record['problems']=problems(record,wall(),config);record['healthy']=not record['problems']
 
 
 if __name__ == '__main__':

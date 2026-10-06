@@ -64,7 +64,7 @@ async def doctor(root,broker_check=False):
         finally:db.close()
     except (OSError,ValueError,sqlite3.Error,KeyError,Unsafe) as exc:check('database',False,type(exc).__name__+': persistent database unavailable')
     try:
-        require_host(r,now);check('host_clock',True)
+        require_host(r);check('host_clock',True)
     except (Unsafe,OSError,ValueError) as exc:check('host_clock',False,str(exc))
     try:
         host=json.loads((r/'host-health.json').read_text());result['host']=host

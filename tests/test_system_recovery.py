@@ -45,7 +45,7 @@ def recovery(env):
 def healthy_files(e,b):
     host(e.root,b.time)
     h=json.loads((e.runtime/'host-health.json').read_text())
-    h.update(supervisor_pid=9,sleep_prevention=True,config_fingerprint=C.fingerprint(e.config))
+    h.update(supervisor_pid=9,ac_power=True,sleep_prevention=True,config_fingerprint=C.fingerprint(e.config))
     (e.runtime/'host-health.json').write_text(json.dumps(h))
     (e.runtime/'supervisor.json').write_text(json.dumps({'pid':9}))
     (e.runtime/'supervisor-health.json').write_text(json.dumps(dict(pid=9,state='RUNNING',at=b.time.timestamp(),worker_pid=1,
