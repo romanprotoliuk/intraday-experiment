@@ -13,6 +13,7 @@ from .engine import Coordinator
 from .risk import CFG
 from .recovery import load_policy
 from .system_recovery import record_hold, recover_flat, read_hold, restart_permitted
+from .operator_authorization import evaluate_pending, KEY as OPERATOR_AUTHORIZATION_KEY
 from ..configuration import applied,apply,market_config,assert_current,fingerprint,path as config_path,warnings
 
 
@@ -78,6 +79,8 @@ def report(root,ledger,engine=None):
     try:state['watchdog']=json.loads((r/'supervisor-health.json').read_text())
     except (OSError,ValueError):state['watchdog']={}
     state['system_recovery']=read_hold(r) or dict(state='LEGACY_OR_OPERATOR' if (r/'KILL').exists() else 'NO_HOLD')
+    authorization=ledger.get(OPERATOR_AUTHORIZATION_KEY)
+    state['operator_recovery_authorization']={k:authorization.get(k) for k in ('id','session','status','expires_at','end_reason')} if isinstance(authorization,dict) else None
     if engine is not None:
         state['position_recovery_policy']=dict(mode=engine.recovery_policy.mode,
             budget_seconds=engine.recovery_policy.budget(config),fingerprint=engine.recovery_policy.fingerprint)
@@ -122,6 +125,7 @@ async def run(root,once=False):
                                 if active and started-bar_at>=config['market_data']['bars_refresh_seconds']:
                                     bars=await broker.bars(engine.cfg.universe,session,now);bar_at=started
                                 if not active:bars={};tradability={}
+                                await evaluate_pending(engine,timeout=wd['cycle_deadline_seconds']-(time.monotonic()-started))
                                 await recover_flat(engine,broker,bars,tradability,generation)
                                 await engine.tick(broker,bars,tradability)
                                 if getattr(broker,'cycle_error',None):raise broker.cycle_error

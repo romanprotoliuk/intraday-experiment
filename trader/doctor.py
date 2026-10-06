@@ -82,6 +82,10 @@ async def doctor(root,broker_check=False):
                 matches=[a for a in accounts['accounts'] if a and a.get('agentic_allowed') and a['account_number'].endswith(config['broker']['account_suffix'])]
                 if len(matches)!=1:raise Unsafe('Configured Agentic account is not unique')
                 account=matches[0]['account_number'];snap=await broker.snapshot(account)
+                identity_db=read_db(root)
+                try:
+                    if kv(identity_db,'account_number')!=account:raise Unsafe('Broker account does not match durable account identity')
+                finally:identity_db.close()
                 power=reconcile(snap,account,datetime.now(UTC),cfg,{})
                 outstanding=[o for o in snap['orders'] if o.get('state') not in BROKER_TERMINAL]
                 if snap['positions'] or outstanding:raise Unsafe('Transition requires zero broker positions/outstanding orders')
@@ -99,10 +103,12 @@ async def doctor(root,broker_check=False):
                         if not session or not session.contains(now):raise Unsafe('Regular-session data not yet available')
                         candidate=evaluate(sym,bars[sym],session,now,cfg)
                         if not candidate.get('opening_high'):raise Unsafe('Completed opening range not available')
+                        if not candidate.get('vwap'):raise Unsafe('Required derived VWAP unavailable')
                         if D(candidate['session_dollars'])<cfg.min_session_dollars:raise Unsafe('Session liquidity below minimum')
                         data[sym]=dict(state=candidate['state'],opening_high=candidate['opening_high'],opening_low=candidate['opening_low'],bid=str(bid),ask=str(ask),quote_ages={k:(now-dt(quotes[sym][k])).total_seconds() for k in ('venue_bid_time','venue_ask_time')},valid_candidate=candidate['state']=='ARMED',last_bar=candidate['last_bar'])
                     except (Unsafe,KeyError,ValueError) as exc:data_ok=False;data[sym]=dict(error=str(exc))
-                result['market_data']=data;check('market_data',data_ok,'Fresh quotes, completed opening bars, spread/liquidity and tradability required')
+                result['market_data']=data;result['market_data_checked_at']=iso(now)
+                check('market_data',data_ok,'Fresh quotes, completed opening bars, spread/liquidity and tradability required')
             result['clean_close']=True
         except Exception as exc:check('broker',False,'; '.join(failure_details(exc)))
     else:check('broker',False,'Broker checks not requested; run doctor --broker')
@@ -118,7 +124,8 @@ def display(result,json_output=False):
     print('CONFIG FINGERPRINT: '+str(result.get('config_fingerprint')))
     for warning in result.get('warnings',[]):print('WARNING: '+warning)
 
-def kill_recovery(root,result):
+def kill_recovery(root,result,clock=None):
+    now=(clock or (lambda:datetime.now(UTC)))()
     p=Path(root)/'runtime/KILL'
     if not p.exists():return
     reason=p.read_text()
@@ -132,39 +139,89 @@ def kill_recovery(root,result):
     db=read_db(root)
     try:
         row=db.execute("select at,data from events where kind='PERSISTENT_WORKER_START' order by id desc limit 1").fetchone()
-        if not row or (datetime.now(UTC)-dt(row['at'])).total_seconds()<300 or json.loads(row['data'])['pid']!=result['heartbeat']['pid']:raise Unsafe('KILL recovery requires same healthy worker for at least five minutes')
-        session=db.execute('SELECT data FROM sessions WHERE day=?',(datetime.now(NY).date().isoformat(),)).fetchone()
+        if not row or (now-dt(row['at'])).total_seconds()<300 or json.loads(row['data'])['pid']!=result['heartbeat']['pid']:raise Unsafe('KILL recovery requires same healthy worker for at least five minutes')
+        session=db.execute('SELECT data FROM sessions WHERE day=?',(now.astimezone(NY).date().isoformat(),)).fetchone()
         day=json.loads(session[0]) if session else {}
         since=day.get('last_failure') or day.get('stable_since')
-        if not since or (datetime.now(UTC)-dt(since)).total_seconds()<300:raise Unsafe('KILL recovery requires five minutes since last connectivity failure')
+        if not since or (now-dt(since)).total_seconds()<300:raise Unsafe('KILL recovery requires five minutes since last connectivity failure')
     finally:db.close()
 
-async def transition(root,activate=False,acknowledge=False,recover_kill=False):
+async def transition(root,activate=False,acknowledge=False,recover_kill=False,*,authorization_id=None,clock=None):
     root=Path(root);r=root/'runtime'
+    now=clock or (lambda:datetime.now(UTC))
     if activate and not acknowledge:raise Unsafe('Activation requires explicit --acknowledge-risk')
+    if authorization_id and not (activate and acknowledge and recover_kill):raise Unsafe('Deferred recovery requires the acknowledged recovery transition')
     with process_lock(r/'configuration.lock'):
+        if authorization_id:
+            from .persistent.operator_authorization import pending, binding_failure, consume, hold_identity, KEY
+            from .persistent.system_recovery import hold_lock
+            if not (r/'persistent.sqlite3').is_file() or (r/'persistent.sqlite3').is_symlink():
+                raise Unsafe('Existing production database required')
+            authorization_ledger=Ledger(r/'persistent.sqlite3')
+            try:
+                with hold_lock(r):
+                    receipt=pending(root,authorization_ledger,now())
+                    if not receipt or receipt['id']!=authorization_id:raise Unsafe('Pending recovery authorization unavailable')
+            finally:authorization_ledger.close()
         result=await doctor(root,True)
         if not activate:display(result);return result
+        if authorization_id:
+            _deferred_result(root,result,now())
         if not result['ready_for_transition']:raise Unsafe('Production transition blocked: '+'; '.join(result['blockers']))
         from .persistent.system_recovery import hold_lock
         with hold_lock(r):
             kill_before=(r/'KILL').read_text() if (r/'KILL').exists() else None
             if kill_before is not None:
                 if not recover_kill:raise Unsafe('KILL recovery requires explicit --recover-kill and reviewed cause')
-                kill_recovery(root,result)
+                kill_recovery(root,result,clock)
         # Hold new entries through the second broker/host reconciliation. The
         # durable transition marker survives interruption and is fail closed.
-        atomic_text(r/'TRANSITION','Production transition in progress; entries blocked\n')
+        barrier='Production transition in progress; entries blocked\n' if not authorization_id else 'Operator authorization '+authorization_id+'; entries blocked\n'
+        if authorization_id and (r/'TRANSITION').exists():raise Unsafe('Another transition is active')
+        atomic_text(r/'TRANSITION',barrier)
         ledger=Ledger(r/'persistent.sqlite3')
         try:
             current=C.assert_current(root,ledger)
             if C.fingerprint(current)!=result['config_fingerprint']:raise Unsafe('Configuration changed during readiness check')
             if ledger.trades() or ledger.orders():raise Unsafe('Position/order appeared during transition')
-            require_host(r)
+            require_host(r,clock)
             # Second fresh read check before removing any submission protection.
             verified=await doctor(root,True)
+            if authorization_id:_deferred_result(root,verified,now())
             if not verified['ready_for_transition']:raise Unsafe('Post-check failed: '+'; '.join(verified['blockers']))
-            C.assert_current(root,ledger);require_host(r)
+            C.assert_current(root,ledger);require_host(r,clock)
+            if authorization_id:
+                # Same third independent read as the immediate operator path,
+                # but KILL stays present throughout all three certifications.
+                final=await doctor(root,True)
+                _deferred_result(root,final,now())
+                if not final['ready_for_transition']:raise Unsafe('Final recovery certification failed')
+                with hold_lock(r):
+                    reason=binding_failure(root,ledger,receipt,now(),transition_owned=True)
+                    if reason or ledger.get(KEY)!=receipt:raise Unsafe('Recovery authorization invalid: '+str(reason))
+                    if (r/'TRANSITION').read_text()!=barrier:raise Unsafe('Transition ownership changed')
+                    kill_recovery(root,final,clock);require_host(r,clock)
+                    _deferred_result(root,final,now())
+                    proof=dict(at=iso(now()),session=receipt['session'],config_fingerprint=receipt['config_fingerprint'],
+                        strategy_fingerprint=receipt['strategy_fingerprint'],broker_observed_at=final['broker']['observed_at'],
+                        checks={k:v['passed'] for k,v in final['checks'].items()},worker_pid=final['heartbeat']['pid'])
+                    with ledger.tx():
+                        reason=binding_failure(root,ledger,receipt,now(),transition_owned=True)
+                        if reason:raise Unsafe('Recovery authorization invalid: '+reason)
+                        consume(ledger,receipt,now(),proof)
+                        ledger.event(now(),'PRODUCTION_TRANSITION',dict(config_fingerprint=C.fingerprint(current),authorization_id=authorization_id,kill_reason=kill_before,live_permission_unchanged=True))
+                    # Durable receipt/proof precedes unlink. Crash at any point
+                    # leaves either KILL or TRANSITION (or both) blocking entries.
+                    if binding_failure(root,ledger,receipt,now(),transition_owned=True) or hold_identity(r)!=receipt['target']:
+                        raise Unsafe('Recovery binding changed after proof commit')
+                    _deferred_result(root,final,now());require_host(r,clock)
+                    if (r/'TRANSITION').read_text()!=barrier:raise Unsafe('Transition ownership changed')
+                    (r/'KILL').unlink()
+                    if (r/'KILL').exists():raise Unsafe('KILL replacement appeared')
+                    ledger.event(now(),'OPERATOR_RECOVERY_HOLD_CLEARED',dict(authorization_id=authorization_id))
+                    if (r/'TRANSITION').read_text()!=barrier:raise Unsafe('Transition ownership changed')
+                    (r/'TRANSITION').unlink()
+                return final
             # Same lock order as supervisor/automatic recovery: hold lock, then DB.
             with hold_lock(r):
                 with ledger.tx():
@@ -179,8 +236,74 @@ async def transition(root,activate=False,acknowledge=False,recover_kill=False):
             if not final['ready_for_transition']:raise Unsafe('Post-enable verification failed')
             (r/'TRANSITION').unlink();print('Persistent LIVE enabled; every future entry still requires current signal and all gates. No test order submitted.')
         except BaseException:
+            if authorization_id:
+                # A failed attempt never leaves entries unblocked:
+                # retain/reinstate the reviewed hold, never overwrite
+                # a replacement. CONSUMED receipts remain permanently spent.
+                from .persistent.operator_authorization import invalidate
+                with hold_lock(r):
+                    if not (r/'KILL').exists():atomic_text(r/'KILL',kill_before)
+                    invalidate(ledger,now(),'TRANSITION_FAILED')
             ledger.configure('live_enabled',False)
             atomic_text(r/'READ_ONLY','Production transition failed; all broker mutations blocked\n')
             atomic_text(r/'MAINTENANCE','Production transition failed; review audit\n')
             raise
         finally:ledger.close()
+
+
+def _deferred_result(root,result,now):
+    """The deferred caller cannot replace absent checks with ready=True."""
+    from .persistent.operator_authorization import invalidate
+    checks=result.get('checks',{})
+    required={'configuration','platform','config_permissions','runtime_permissions','account_selector',
+        'session','STOP','LIQUIDATE','ENTRIES_DISABLED','database','applied_configuration','risk_configuration',
+        'local_flat','connectivity','opening_health','session_risk','host_clock','heartbeat','watchdog','broker','market_data'}
+    hard={'broker','database','applied_configuration','risk_configuration','local_flat'}
+    if any(checks.get(k,{}).get('passed') is False for k in hard):
+        if not (Path(root)/'runtime/persistent.sqlite3').is_file():raise Unsafe('Existing production database required')
+        ledger=Ledger(Path(root)/'runtime/persistent.sqlite3')
+        try:invalidate(ledger,now,'HARD_CERTIFICATION_FAILURE')
+        finally:ledger.close()
+    if not required<=checks.keys() or any(checks[k].get('passed') is not True for k in required):
+        raise Unsafe('Existing recovery certification incomplete')
+    if result.get('operator_blocks')!=['KILL']:raise Unsafe('Unrelated operator hold or permission change')
+    broker=result.get('broker',{})
+    if broker.get('reconciled') is not True or broker.get('positions')!=0 or broker.get('orders')!=0:
+        raise Unsafe('Fresh flat broker certification required')
+    age=(now-dt(broker['observed_at'])).total_seconds()
+    config=C.load(root)
+    if not 0<=age<=config['execution']['preflight_max_age_seconds']:raise Unsafe('Recovery broker evidence stale')
+    session=Calendar(config).session(now)
+    if not session or not session.entry_window(now):raise Unsafe('Recovery entry window unavailable')
+    db=read_db(root)
+    try:
+        worker=kv(db,'worker_identity',{})
+        row=db.execute('SELECT data FROM sessions WHERE day=?',(session.day,)).fetchone()
+        day=json.loads(row[0]) if row else {}
+        if (day.get('day')!=session.day or not day.get('opening_healthy') or day.get('recovery_active',True)
+                or day.get('connectivity_halt',True) or day.get('closed',True) or day.get('entry_cutoff_latched',True)
+                or day.get('loss_latched',True) or not 0<=day.get('attempts',-1)<config['trading']['max_entry_attempts_per_session']
+                or not D(0)<=D(day.get('gross_losses','-1'))<D(day.get('loss_budget','0'))):
+            raise Unsafe('Current session recovery/risk state failed')
+    finally:db.close()
+    runtime=Path(root)/'runtime'
+    heartbeat=json.loads((runtime/'heartbeat.json').read_text());watchdog=json.loads((runtime/'supervisor-health.json').read_text())
+    now=datetime.now(UTC)  # Sample after asynchronous evidence files are read.
+    if not session.entry_window(now):raise Unsafe('Recovery entry window unavailable')
+    if not 0<=(now-dt(broker['observed_at'])).total_seconds()<=config['execution']['preflight_max_age_seconds']:
+        raise Unsafe('Recovery broker evidence stale')
+    if (not worker.get('generation') or worker['generation']!=watchdog.get('worker_generation') or
+            worker.get('pid')!=heartbeat.get('pid') or worker.get('pid')!=watchdog.get('worker_pid') or
+            worker.get('pid')!=result.get('heartbeat',{}).get('pid') or worker.get('supervisor_pid')!=watchdog.get('pid') or
+            heartbeat.get('state') not in ('POLLING','HEALTHY','ENTRIES_BLOCKED') or watchdog.get('state')!='RUNNING' or
+            not 0<=now.timestamp()-heartbeat['at']<=config['watchdog']['heartbeat_stale_seconds'] or
+            not 0<=now.timestamp()-watchdog['at']<=config['host']['health_max_age_seconds']):
+        raise Unsafe('Current worker/watchdog generation failed')
+    elapsed=(now-dt(result['market_data_checked_at'])).total_seconds()
+    minutes=config['strategy']['bar_interval_minutes']
+    latest=session.open+timedelta(minutes=(int((now-session.open).total_seconds()//(60*minutes))-1)*minutes)
+    for symbol in config['trading']['symbols']:
+        data=result['market_data'][symbol]
+        if elapsed<0 or dt(data['last_bar'])!=latest:raise Unsafe('Completed-bar certification became stale')
+        if any(not 0<=data['quote_ages'][k]+elapsed<=config['market_data']['max_quote_age_seconds'] for k in ('venue_bid_time','venue_ask_time')):
+            raise Unsafe('Quote certification became stale')

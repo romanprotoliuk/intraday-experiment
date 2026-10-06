@@ -32,7 +32,7 @@ def main():
     for name in COMMANDS:
         cp=cs.add_parser(name);cp.add_argument("value")
     p=subs.add_parser('doctor');p.add_argument('--broker',action='store_true');p.add_argument('--json',action='store_true')
-    p=subs.add_parser('production');p.add_argument('action',choices=['check','activate']);p.add_argument('--acknowledge-risk',action='store_true');p.add_argument('--recover-kill',action='store_true')
+    p=subs.add_parser('production');p.add_argument('action',choices=['check','activate','authorize-recovery']);p.add_argument('--acknowledge-risk',action='store_true');p.add_argument('--recover-kill',action='store_true');p.add_argument('--session')
     p=subs.add_parser('launchagent');p.add_argument('action',choices=['generate']);p.add_argument('--output',type=Path)
     p=subs.add_parser('clock-diagnostics');p.add_argument('--samples',type=int,default=10);p.add_argument('--interval',type=int,default=10)
     p=subs.add_parser('stop')
@@ -84,8 +84,14 @@ def main():
             result=asyncio.run(doctor(root,args.broker));display(result,args.json)
             if not result['ready']:raise SystemExit(1)
         elif args.command=='production':
-            from .doctor import transition
-            asyncio.run(transition(root,args.action=='activate',args.acknowledge_risk,args.recover_kill))
+            if args.action=='authorize-recovery':
+                from .persistent.operator_authorization import create
+                if not args.session or not args.recover_kill:raise Unsafe('Session and exact legacy KILL recovery intent must be explicit')
+                record=create(root,args.session,acknowledge=args.acknowledge_risk)
+                print(json.dumps({k:record[k] for k in ('id','session','status','expires_at')}))
+            else:
+                from .doctor import transition
+                asyncio.run(transition(root,args.action=='activate',args.acknowledge_risk,args.recover_kill))
         elif args.command=='launchagent':
             from .operator_tools import launchagent
             print(launchagent(root,args.output))
