@@ -64,6 +64,9 @@ def outside_session(root,now):
 
 
 def valid_review(root,db,record,now):
+    if isinstance(record,dict) and record.get('version')=='investigated-successor-1':
+        from .review_successor import valid_successor
+        return valid_successor(root,db,record,now)
     try:
         config=C.load(root)
         if not isinstance(record,dict) or record.get('version')!=VERSION or record.get('status')!='REVIEWED':return False
@@ -97,7 +100,15 @@ def classify_hold(root,db,now=None):
             and hold.get('positions_at_failure')==0 and hold.get('unresolved_at_failure')==0
             and hold.get('failures',999)<hold.get('failure_limit',0)):return 'B'
         return 'A'
-    return 'C' if valid_review(root,db,kv(db,KEY),now or datetime.now(UTC)) else 'A'
+    return 'C' if valid_review(root,db,active_review(db),now or datetime.now(UTC)) else 'A'
+
+
+def active_review(db):
+    """Legacy receipt never overwritten when a successor becomes current."""
+    head=kv(db,'legacy_successor_head')
+    if head is None:return kv(db,KEY)
+    if not isinstance(head,str):return None
+    return kv(db,'legacy_review_receipt:'+head)
 
 
 def review(root,event_ids,expected_target,*,investigated=False,now=None):
@@ -127,7 +138,15 @@ def review(root,event_ids,expected_target,*,investigated=False,now=None):
 
 def require_proof(root,ledger,review_record,proof,clock,transition_text=None):
     now=clock();outside_session(root,now)
-    if ledger.get(KEY)!=review_record or not valid_review(root,ledger.db,review_record,now):raise Unsafe('Incident review invalid or replaced')
+    if active_review(ledger.db)!=review_record or not valid_review(root,ledger.db,review_record,now):raise Unsafe('Incident review invalid or replaced')
+    require_control_proof(root,ledger,proof,clock,transition_text)
+    if review_record['version']=='investigated-successor-1' and proof.get('broker',{}).get('order_history_digest')!=review_record['interval']['order_history_digest']:
+        raise Unsafe('Broker order history changed after successor investigation')
+
+
+def require_control_proof(root,ledger,proof,clock,transition_text=None):
+    """Same flat, outside-session health proof for review and acknowledgment."""
+    now=clock();outside_session(root,now)
     required={'platform','config_permissions','runtime_permissions','database','configuration','strategy','risk','local_flat','ownership','worker_stable','quiet_period','heartbeat','watchdog','processes','launchagent','host_clock','ac_power','broker','worker_auth'}
     if not all(proof.get('checks',{}).get(k) is True for k in required):raise Unsafe('Control-plane proof incomplete')
     config=C.assert_current(root,ledger)
@@ -161,7 +180,7 @@ async def acknowledge(root,review_id,*,acknowledge=False,now=None):
     with process_lock(r/'configuration.lock'):
         ledger=Ledger.existing(r/'persistent.sqlite3')
         try:
-            record=ledger.get(KEY)
+            record=active_review(ledger.db)
             if not record or record.get('id')!=review_id:raise Unsafe('Exact reviewed incident required')
             proof=await control_snapshot(root,now=clock)
             text='Legacy incident transition '+review_id+'; entries blocked\n'
@@ -174,7 +193,9 @@ async def acknowledge(root,review_id,*,acknowledge=False,now=None):
                 with ledger.tx():
                     require_proof(root,ledger,record,proof,clock,text)
                     done=dict(record,status='ACKNOWLEDGED',acknowledged_at=iso(clock()))
-                    ledger.put(KEY,done)
+                    if record['version']=='investigated-successor-1':
+                        ledger.put('legacy_review_status:'+record['id'],done)
+                    else:ledger.put(KEY,done)
                     ledger.event(clock(),'LEGACY_INCIDENT_ACKNOWLEDGED',dict(review_id=review_id,target=record['target'],proof=proof))
                 # Proof and consumption durable before unlink. Crash leaves TRANSITION.
                 if hold_identity(r)!=record['target'] or (r/'TRANSITION').read_text()!=text:raise Unsafe('Control changed after proof commit')

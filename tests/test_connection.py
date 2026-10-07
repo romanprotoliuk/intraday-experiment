@@ -99,6 +99,10 @@ def test_timeout_does_not_retry_or_break_clean_teardown(wire, caplog):
                 await b.call('get_accounts',{})
         except Exception as exc:
             assert 'McpError' in failure_types(exc)
+            from trader.persistent.recovery import classify
+            diagnostic=classify(exc,dict(tool='get_accounts'))
+            assert diagnostic['failure_class']=='TRANSIENT_READ_TRANSPORT_FAILURE'
+            assert diagnostic['transport_kind']=='MCP_LOCAL_READ_TIMEOUT'
         else:
             pytest.fail('Missing response must time out')
     asyncio.run(run())

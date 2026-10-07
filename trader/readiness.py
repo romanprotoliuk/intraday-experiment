@@ -1,6 +1,7 @@
 """Read-only next-session certification; never equates monitoring with entry."""
 from datetime import datetime, timedelta
 import json
+import hashlib
 import os
 import platform
 from pathlib import Path
@@ -15,6 +16,13 @@ from .host_health import require_host
 from .models import UTC, NY, Unsafe, dt, iso
 from .oauth_refresh import credential_health
 from .risk import reconcile, TERMINAL
+
+
+def order_history_digest(orders):
+    """Bind complete returned terminal history without storing broker identifiers."""
+    if not isinstance(orders,list):raise Unsafe('Order history unavailable')
+    canonical=sorted(json.dumps(o,sort_keys=True,separators=(',',':')) for o in orders)
+    return hashlib.sha256(json.dumps(canonical,separators=(',',':')).encode()).hexdigest()
 
 
 def next_session(config, now):
@@ -102,7 +110,7 @@ async def control_snapshot(root, *, now=None, broker_check=True):
                     power=reconcile(snap,account,clock(),C.market_config(config),{})
                     if snap['positions'] or any(o.get('state') not in TERMINAL for o in snap['orders']):raise Unsafe('Broker flat required')
                     result['broker']=dict(authenticated=True,expected_account=True,reconciled=True,positions=0,orders=0,
-                                          buying_power=str(power),observed_at=snap['observed_at'])
+                                          buying_power=str(power),observed_at=snap['observed_at'],order_history_digest=order_history_digest(snap['orders']))
                     check('broker',True)
             # Re-read after awaits. This snapshot is NOT itself clearance authority.
             check('local_flat',not db.execute("SELECT 1 FROM trades WHERE status='OPEN'").fetchone() and

@@ -37,7 +37,7 @@ def main():
     p=subs.add_parser('clock-diagnostics');p.add_argument('--samples',type=int,default=10);p.add_argument('--interval',type=int,default=10)
     p=subs.add_parser('readiness');p.add_argument('action',choices=['next-session']);p.add_argument('--no-broker',action='store_true')
     p=subs.add_parser('session-forensics');p.add_argument('--date',required=True)
-    p=subs.add_parser('legacy-incident');p.add_argument('action',choices=['inspect','review','acknowledge'])
+    p=subs.add_parser('legacy-incident');p.add_argument('action',choices=['inspect','review','successor','acknowledge'])
     p.add_argument('--target-identity',type=Path);p.add_argument('--event-id',action='append',type=int)
     p.add_argument('--review-id');p.add_argument('--investigation-complete',action='store_true');p.add_argument('--acknowledge',action='store_true')
     p=subs.add_parser('stop')
@@ -74,6 +74,10 @@ def main():
             if not args.target_identity:parser.error('--target-identity required')
             result=review(root,args.event_id,json.loads(args.target_identity.read_text()),investigated=args.investigation_complete)
             print(json.dumps({k:result[k] for k in ('id','status','expires_at')}));return
+        if args.action=='successor':
+            from .review_successor import successor
+            result=asyncio.run(successor(root,args.review_id,investigated=args.investigation_complete))
+            print(json.dumps({k:result[k] for k in ('id','parent_id','status','expires_at')}));return
         print(json.dumps(asyncio.run(acknowledge(root,args.review_id,acknowledge=args.acknowledge))));return
     runtime.mkdir(parents=True, exist_ok=True)
     runtime.chmod(0o700)

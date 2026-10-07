@@ -15,6 +15,7 @@ from pathlib import Path
 from dataclasses import asdict
 
 import httpx
+from mcp.shared.exceptions import McpError
 
 from ..diagnostics import exception_record
 from ..models import Unsafe, dt, iso
@@ -128,6 +129,8 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
         kind = next(e.failure_class for e in leaves if isinstance(e, RecoveryError))
     elif any(isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (401, 403) for e in leaves):
         kind = Failure.AUTHENTICATION_FAILURE
+    elif operation == 'READ' and leaves and all(local_mcp_timeout(e) for e in leaves):
+        kind = Failure.REPEATED_BROKER_COMMUNICATION_FAILURE if repeated else Failure.TRANSIENT_READ_TRANSPORT_FAILURE
     elif operation == 'READ' and any(isinstance(e, (httpx.TransportError, ConnectionError, TimeoutError)) for e in leaves):
         kind = Failure.REPEATED_BROKER_COMMUNICATION_FAILURE if repeated else Failure.TRANSIENT_READ_TRANSPORT_FAILURE
     else:
@@ -148,6 +151,8 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
         subtype = 'GOAWAY_OR_CONNECTION_TERMINATED'  # Do not assert clean close without an error code.
     elif any(isinstance(e, socket.gaierror) for e in leaves):
         subtype = 'DNS_FAILURE'
+    elif leaves and all(local_mcp_timeout(e) for e in leaves):
+        subtype = 'MCP_LOCAL_READ_TIMEOUT'
     elif any(isinstance(e, (httpx.TimeoutException, TimeoutError)) for e in leaves):
         subtype = 'TIMEOUT'
     elif any(isinstance(e, httpx.HTTPStatusError) for e in leaves):
@@ -160,6 +165,17 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
         subtype = 'UNKNOWN'
     diagnostic['transport_kind'] = subtype
     return diagnostic
+
+
+def local_mcp_timeout(exc):
+    """Pinned SDK's *local* deadline, not a server-supplied JSON-RPC 408.
+
+    MCP 1.30 raises McpError inside ``except TimeoutError``. Its implicit
+    context survives TaskGroup wrapping; a remote 408 has no such context.
+    Never classify by numeric code or human-readable text alone.
+    """
+    return (isinstance(exc,McpError) and exc.error.code==408 and
+            isinstance(exc.__context__,TimeoutError) and not exc.__suppress_context__)
 
 
 def begin(existing, failure, now, monotonic_now, budget, *, conservative=False):
