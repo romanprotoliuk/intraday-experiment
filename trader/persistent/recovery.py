@@ -134,9 +134,14 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
     elif mutation:
         kind = Failure.AMBIGUOUS_MUTATING_ORDER_STATE
     elif any(isinstance(e, RecoveryError) for e in leaves):
-        kind = (next(e.failure_class for e in leaves if isinstance(e, RecoveryError))
-                if all(isinstance(e,RecoveryError) or _known_transport(e) for e in leaves)
-                else Failure.RECONCILIATION_FAILURE)
+        tagged={e.failure_class for e in leaves if isinstance(e,RecoveryError)}
+        # A benign first leaf must never hide a later known hard failure.
+        hard=next((k for k in (Failure.AMBIGUOUS_MUTATING_ORDER_STATE,
+            Failure.OWNERSHIP_POSITION_MISMATCH,Failure.AUTHENTICATION_FAILURE,
+            Failure.RECONCILIATION_FAILURE) if k in tagged),None)
+        kind = hard or (next(iter(tagged)) if len(tagged)==1 and
+            all(isinstance(e,RecoveryError) or _known_transport(e) for e in leaves)
+            else Failure.RECONCILIATION_FAILURE)
     elif any(isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (401, 403) for e in leaves):
         kind = Failure.AUTHENTICATION_FAILURE
     elif operation == 'READ' and leaves and all(local_mcp_timeout(e) for e in leaves):

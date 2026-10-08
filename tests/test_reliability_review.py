@@ -193,3 +193,9 @@ def test_known_market_data_read_uses_same_investigated_unavailability_proof(inci
     record=create(incident)
     assert record['interval']['resolved_reads'][-1]['tools']==[tool]
     assert db.get(L.KEY)==parent and (e.runtime/'KILL').exists()
+
+@pytest.mark.parametrize('hard',['AUTHENTICATION_FAILURE','AMBIGUOUS_MUTATING_ORDER_STATE','OWNERSHIP_POSITION_MISMATCH','CLOCK_HEALTH_FAILURE'])
+def test_known_hard_failure_cannot_hide_behind_classified_read(hard):
+    from trader.persistent.recovery import RecoveryError,Failure
+    exc=ExceptionGroup('synthetic',[RecoveryError(Failure.TRANSIENT_READ_TRANSPORT_FAILURE,'read'),RecoveryError(Failure(hard),'hard')])
+    assert classify(exc,{'tool':'get_equity_orders'})['failure_class'] not in ('TRANSIENT_READ_TRANSPORT_FAILURE','REPEATED_BROKER_COMMUNICATION_FAILURE')
