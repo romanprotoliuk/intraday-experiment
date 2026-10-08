@@ -29,12 +29,12 @@ def clock_diagnostics(root,samples=10,interval=10):
         except (OSError,ValueError,IndexError,subprocess.TimeoutExpired,Unsafe) as exc:row['error']=type(exc).__name__+': '+str(exc)
         rows.append(row);print(json.dumps(row),flush=True)
         if i<samples-1:time.sleep(max(0,interval-(time.monotonic()-start)))
-    good=[r for r in rows if 'error' not in r];summary={'samples':len(good),'failed':len(rows)-len(good),'policy':'abs(offset)+uncertainty <= '+cfg['clock']['max_combined_bound_ms']+' ms','policy_changed':False}
+    good=[r for r in rows if 'error' not in r];summary={'samples':len(good),'failed':len(rows)-len(good),'policy':'abs(offset)+uncertainty < '+cfg['clock']['max_combined_bound_ms']+' ms','policy_changed':False}
     for k in ('offset_ms','uncertainty_ms','combined_ms','network_rtt_ms'):
         values=[r[k] for r in good]
         summary[k]={'median':statistics.median(values),'maximum':max(values),'standard_deviation':statistics.pstdev(values)} if values else None
     summary['max_absolute_offset_ms']=max((abs(r['offset_ms']) for r in good),default=None)
-    summary['passing_samples']=sum(r['combined_ms']<=float(cfg['clock']['max_combined_bound_ms']) for r in good)
+    summary['passing_samples']=sum(r['combined_ms']<float(cfg['clock']['max_combined_bound_ms']) for r in good)
     summary['note']='RTT standard deviation is delay variation, not measured clock error or the NTP peer-jitter estimator.'
     filename=out/(datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'.json');filename.write_text(json.dumps({'samples':rows,'summary':summary},indent=2))
     print(json.dumps(summary,indent=2));print('Saved '+str(filename));return summary

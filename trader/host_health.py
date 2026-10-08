@@ -106,8 +106,8 @@ def problems(record, now, config=None):
         if not 0 <= (now-dt(c['at'])).total_seconds() <= clock.get('sample_max_age_seconds',MAX_CLOCK_AGE):
             errors.append('Clock measurement stale or future')
         offset, uncertainty = float(c['offset_seconds']), float(c['uncertainty_seconds'])
-        if not all(math.isfinite(x) for x in (offset, uncertainty)) or uncertainty < 0 or abs(offset)+uncertainty > float(clock.get('max_combined_bound_ms','50'))/1000:
-            errors.append('Clock error/uncertainty exceeds '+str(clock.get('max_combined_bound_ms','50'))+' milliseconds')
+        if not all(math.isfinite(x) for x in (offset, uncertainty)) or uncertainty < 0 or abs(offset)+uncertainty >= float(clock.get('max_combined_bound_ms','50'))/1000:
+            errors.append('Clock error/uncertainty meets or exceeds '+str(clock.get('max_combined_bound_ms','50'))+' milliseconds')
     except (KeyError, TypeError, ValueError):
         errors.append('Host/clock evidence incomplete')
     return errors

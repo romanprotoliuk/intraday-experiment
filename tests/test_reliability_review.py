@@ -199,3 +199,21 @@ def test_known_hard_failure_cannot_hide_behind_classified_read(hard):
     from trader.persistent.recovery import RecoveryError,Failure
     exc=ExceptionGroup('synthetic',[RecoveryError(Failure.TRANSIENT_READ_TRANSPORT_FAILURE,'read'),RecoveryError(Failure(hard),'hard')])
     assert classify(exc,{'tool':'get_equity_orders'})['failure_class'] not in ('TRANSIENT_READ_TRANSPORT_FAILURE','REPEATED_BROKER_COMMUNICATION_FAILURE')
+
+
+@pytest.mark.parametrize('failures,allowed',[(1,True),(2,True),(3,False),(4,False)])
+@pytest.mark.parametrize('rollover',[False,True])
+def test_preserved_budget_boundaries_survive_rollover(recovery,failures,allowed,rollover):
+    e,b,db,_,_=recovery
+    (e.runtime/'KILL').write_text('synthetic operator hold')
+    before=(e.runtime/'KILL').read_bytes()
+    for n in range(failures):
+        R.record_hold(e.runtime,db,'WATCHDOG_STALL',700+n,'budget-'+str(n),b.time)
+        R.record_hold(e.runtime,db,'WORKER_EXIT',700+n,'budget-'+str(n),b.time,exit_code=-9)
+        if rollover:b.time+=timedelta(days=1)
+    changes=db.db.total_changes
+    assert R.preserved_failure_evidence(db.db)['failures']==failures
+    assert R.restart_permitted(e.runtime,db) is allowed
+    assert db.db.total_changes==changes
+    assert (e.runtime/'KILL').read_bytes()==before
+    assert not b.calls and not b.cancels

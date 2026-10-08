@@ -88,6 +88,10 @@ AC/lid/assertion/clock certification remains mandatory.
 
 ## Remaining deliberate boundaries and operational limitations
 
+- Clock certification and query-only diagnostics use the same strict combined
+  bound: equality with the configured maximum fails. This corrects a boundary
+  comparison; it does not increase the configured threshold or change the source,
+  sampling interval, freshness requirement or synchronization mechanism.
 - macOS caffeinate assertions cannot make a battery-powered closed-lid computer
   a reliable unattended host. AC, open lid, owned assertions, fresh host evidence
   and combined clock bound strictly below 90 ms remain required.
