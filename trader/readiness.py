@@ -78,7 +78,8 @@ async def control_snapshot(root, *, now=None, broker_check=True):
             check('watchdog',w.get('state')=='RUNNING' and 0<=checked.timestamp()-w['at']<=config['host']['health_max_age_seconds'] and w.get('config_fingerprint')==C.fingerprint(config))
             os.kill(h['pid'],0);os.kill(w['pid'],0);check('processes',True)
             check('launchagent',launchagent_running(w['pid']))
-            require_host(r,clock);check('host_clock',True)
+            try:require_host(r,clock);check('host_clock',True)
+            except (Unsafe,OSError,ValueError,KeyError,TypeError):check('host_clock',False)
             host=json.loads((r/'host-health.json').read_text())
             result['host']={k:host.get(k) for k in ('ac_power','lid_open','sleep_prevention')}
             result['clock']=dict(at=host['clock']['at'],
@@ -87,6 +88,9 @@ async def control_snapshot(root, *, now=None, broker_check=True):
             check('ac_power',host.get('ac_power') is True)
             result['controls']=[name for name in ('KILL','MAINTENANCE','STOP','TRANSITION','LIQUIDATE','READ_ONLY','ENTRIES_DISABLED') if (r/name).exists()]
             check('no_other_control',not set(result['controls'])-{'KILL'})
+            from .persistent.system_recovery import preserved_failure_evidence
+            preserved=preserved_failure_evidence(db);result['preserved_failure_budget']=preserved
+            check('restart_budget','KILL' not in result['controls'] or preserved['failures']<config['watchdog']['restart_limit'])
             result['current_health']=kv(db,'health',{})
             # Only a safe subset; no account, order identifiers or exception text.
             result['current_health']={k:result['current_health'].get(k) for k in ('at','auth','reconciled','data_healthy')}
@@ -162,9 +166,7 @@ async def certify(root, *, broker_check=True, now=None):
         try:
             row=db.execute('SELECT data FROM sessions WHERE day=?',(session.day,)).fetchone()
             day=json.loads(row[0]) if row else None
-            reset=day is None or (day.get('day')==session.day and day.get('attempts')==0 and
-                not any(day.get(k) for k in ('loss_latched','closed','entry_cutoff_latched','opening_healthy','liquidation_due')) and
-                day.get('gross_losses')=='0' and day.get('recovery_active') is True)
+            reset=session_initial_state(day,session,config)
             from .legacy_recovery import classify_hold
             classification=classify_hold(root,db,clock())
         finally:db.close()
@@ -174,7 +176,39 @@ async def certify(root, *, broker_check=True, now=None):
         result=summarize(snapshot,controls=snapshot.get('controls',['UNKNOWN']),auth=auth,reset_valid=reset,
                          next_session_info=info,recovery_class=classification)
         result['snapshot']=snapshot;result['next_session_reset']='PENDING_NORMAL_CREATION' if day is None else 'VERIFIED' if reset else 'INVALID'
-        return result
+        return readiness_dimensions(root,result,reset)
     except Exception as exc:
-        return dict(INFRASTRUCTURE_READY=False,MONITORING_READY=False,UNATTENDED_LIVE_READY=False,
+        return dict(ENGINEERING_READY=False,DEPLOYMENT_READY=False,CONTROL_READY=False,SESSION_READY=False,INFRASTRUCTURE_READY=False,MONITORING_READY=False,UNATTENDED_LIVE_READY=False,
                     operator_action_required=['Next-session evidence unavailable'],error_type=type(exc).__name__,snapshot=snapshot)
+
+
+def session_initial_state(day,session,config):
+    """A nonexistent future row is normal; existing rows must be genuinely fresh."""
+    from .models import D
+    from .persistent.config import Settings
+    if day is None:return True
+    try:
+        return (day.get('day')==session.day and day.get('attempts')==0 and day.get('completed')==0 and
+            not any(day.get(k) for k in ('loss_latched','closed','entry_cutoff_latched','opening_healthy','liquidation_due','connectivity_halt')) and
+            D(day['gross_losses'])==0 and D(day['net'])==0 and
+            D(day['loss_budget'])==Settings(**C.settings_values(config)).daily_loss and
+            day.get('recovery_active') is True and day.get('successes')==0 and
+            day.get('config_fingerprint')==C.fingerprint(config) and day.get('strategy_fingerprint')==C.strategy_fingerprint(config))
+    except (ValueError,TypeError,KeyError,ArithmeticError):return False
+
+
+def readiness_dimensions(root,result,reset_valid):
+    from .build_verification import verify
+    build=verify(root);snapshot=result['snapshot'];checks=snapshot['checks']
+    result['build_verification']=build;result['ENGINEERING_READY']=build['passed']
+    result['DEPLOYMENT_READY']=build['passed'] and snapshot.get('passed') is True
+    # CONTROL_READY requires the active operator control to be resolved, even
+    # when an automatic structured recovery may complete during the session.
+    result['CONTROL_READY']=not snapshot.get('controls',['UNKNOWN']) and result.get('recovery_class')=='NORMAL' and checks.get('restart_budget') is True
+    result['SESSION_READY']=bool(reset_valid and checks.get('local_flat') and checks.get('configuration') and checks.get('strategy'))
+    result['session_scope']='Next-session initialization only; opening/entry certification pending'
+    result['normal_future_session_gates']=['Active exchange entry window','Fresh session bars and VWAP','Completed opening range and opening health','Fresh broker/data/clock/host/risk proof','Valid deterministic strategy signal']
+    if not build['passed']:
+        result['operator_action_required'].append('Exact-build test/audit verification missing or invalid')
+        result['UNATTENDED_LIVE_READY']=False
+    return result

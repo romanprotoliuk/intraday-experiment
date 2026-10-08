@@ -60,7 +60,8 @@ def record_hold(runtime, ledger, reason, pid, generation, now, *, failure=None, 
     with hold_lock(runtime):
         previous = read_hold(runtime)
         if (runtime/'KILL').exists() and previous is None:
-            ledger.event(now, 'SYSTEM_HOLD_PRESERVED', dict(reason_code=reason, legacy_or_operator=True))
+            ledger.event(now, 'SYSTEM_HOLD_PRESERVED', dict(reason_code=reason, legacy_or_operator=True,
+                worker_pid=pid, worker_generation=generation, failure=failure or {}, exit_code=exit_code))
             return None
         if previous and previous.get('operator_required'):
             # Stronger cause stays immutable, but subsequent distinct failures still
@@ -263,6 +264,30 @@ async def recover_flat(engine, broker, bars, tradability, generation):
     return True
 
 
+def preserved_failure_evidence(db):
+    """Read-only reconstruction, including records predating generation storage.
+
+    Preserving a stronger hold must not erase the failures underneath it. Count
+    distinct worker generations, not the consequent SIGKILL twice. Unknown
+    generations count conservatively as separate failures. No midnight reset.
+    """
+    generations=set();by_pid={};pending=None;event_ids=[]
+    for eid,kind,text in db.execute("SELECT id,kind,data FROM events WHERE kind IN ('SYSTEM_HOLD_PRESERVED','WATCHDOG_STALL','WORKER_EXIT') ORDER BY id"):
+        d=json.loads(text)
+        if kind=='SYSTEM_HOLD_PRESERVED':
+            event_ids.append(eid)
+            if d.get('worker_generation'):
+                generations.add(d['worker_generation']);pending=None
+            else:pending=d.get('reason_code')
+        elif kind=='WATCHDOG_STALL' and pending=='WATCHDOG_STALL':
+            generation=d.get('worker_generation') or 'unknown-event:'+str(eid)
+            generations.add(generation);by_pid[d.get('pid')]=generation;pending=None
+        elif kind=='WORKER_EXIT' and pending=='WORKER_EXIT':
+            generations.add(by_pid.get(d.get('pid'),'unknown-event:'+str(eid)));pending=None
+    if pending is not None:generations.add('unresolved-preserved-failure')
+    return dict(failures=len(generations),event_ids=event_ids,unresolved=pending is not None)
+
+
 def restart_permitted(runtime, ledger):
     """Stop flat crash loops after the cumulative budget; retain position monitoring.
 
@@ -270,8 +295,13 @@ def restart_permitted(runtime, ledger):
     observation-only diagnosis. Neither step erases this hold or its budget.
     """
     record = read_hold(runtime)
-    if not record or record.get('failures', 0) < record.get('failure_limit', 1):
-        return True
+    if record:
+        exhausted=record.get('failures',0)>=record.get('failure_limit',1)
+    else:
+        if not (Path(runtime)/'KILL').exists():return True
+        config=ledger.get('production_config') or __import__('trader.configuration',fromlist=['DEFAULTS']).DEFAULTS
+        exhausted=preserved_failure_evidence(ledger.db)['failures']>=config['watchdog']['restart_limit']
+    if not exhausted:return True
     if ledger.trades() or ledger.orders():
         return True  # Existing rolling throttle still applies; protection takes priority.
     return not ledger.settings().live_enabled and (Path(runtime)/'READ_ONLY').exists()

@@ -171,6 +171,17 @@ def restart_history(history, now, window):
     return [x for x in history if now-x<=window]
 
 
+def needs_awake(runtime,ledger,session,now,config):
+    """Keep supported disarmed incident monitoring independent of a terminal.
+
+    This requests the same supported assertions; AC/lid/clock requirements still
+    decide health. It does not grant entry or change a persistent preference.
+    """
+    diagnostic=(Path(runtime)/'KILL').exists() and (Path(runtime)/'READ_ONLY').exists()
+    return bool(ledger.settings().live_enabled or ledger.trades() or diagnostic or
+        (session and session.open-timedelta(minutes=config['session']['monitor_warmup_minutes'])<=now<session.close+timedelta(minutes=5)))
+
+
 def supervise(root):
     root=Path(root);r=root/'runtime';stop=False
     def stopping(*_):
@@ -204,7 +215,7 @@ def supervise(root):
                     child=subprocess.Popen([sys.executable,'-m','trader','--root',str(root),'run','--mode','LIVE'],cwd=root,env=dict(os.environ,TRADER_WORKER_GENERATION=generation));born=time.time()
                 now=datetime.now(UTC);session=cal.session(now)
                 ledger.checkpoint(session,now)
-                awake=ledger.settings().live_enabled or bool(ledger.trades()) or bool(session and session.open-timedelta(minutes=config['session']['monitor_warmup_minutes'])<=now<session.close+timedelta(minutes=5))
+                awake=needs_awake(r,ledger,session,now,config)
                 if inhibitor is not None and inhibitor.poll() is not None:inhibitor=None
                 if awake and inhibitor is None:inhibitor=subprocess.Popen(['/usr/bin/caffeinate','-is','-w',str(os.getpid())])
                 elif not awake and inhibitor is not None:inhibitor.terminate();inhibitor.wait();inhibitor=None

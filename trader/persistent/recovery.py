@@ -110,6 +110,14 @@ def _leaves(exc):
             yield from _leaves(exc.__cause__)
 
 
+def _known_transport(exc):
+    # httpx retains an httpcore cause. Both must be recognized, while an
+    # unrelated software exception in the same TaskGroup must remain hard.
+    import httpcore
+    return isinstance(exc,(httpx.TransportError,httpcore.NetworkError,httpcore.TimeoutException,
+                           httpcore.RemoteProtocolError,ConnectionError,TimeoutError,socket.gaierror)) or local_mcp_timeout(exc)
+
+
 def classify(exc, context=None, *, repeated=False, explicit=None):
     """Unknown failures default to failed reconciliation, never a benign read.
 
@@ -126,12 +134,14 @@ def classify(exc, context=None, *, repeated=False, explicit=None):
     elif mutation:
         kind = Failure.AMBIGUOUS_MUTATING_ORDER_STATE
     elif any(isinstance(e, RecoveryError) for e in leaves):
-        kind = next(e.failure_class for e in leaves if isinstance(e, RecoveryError))
+        kind = (next(e.failure_class for e in leaves if isinstance(e, RecoveryError))
+                if all(isinstance(e,RecoveryError) or _known_transport(e) for e in leaves)
+                else Failure.RECONCILIATION_FAILURE)
     elif any(isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (401, 403) for e in leaves):
         kind = Failure.AUTHENTICATION_FAILURE
     elif operation == 'READ' and leaves and all(local_mcp_timeout(e) for e in leaves):
         kind = Failure.REPEATED_BROKER_COMMUNICATION_FAILURE if repeated else Failure.TRANSIENT_READ_TRANSPORT_FAILURE
-    elif operation == 'READ' and any(isinstance(e, (httpx.TransportError, ConnectionError, TimeoutError)) for e in leaves):
+    elif operation == 'READ' and leaves and all(_known_transport(e) for e in leaves):
         kind = Failure.REPEATED_BROKER_COMMUNICATION_FAILURE if repeated else Failure.TRANSIENT_READ_TRANSPORT_FAILURE
     else:
         kind = Failure.RECONCILIATION_FAILURE

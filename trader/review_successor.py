@@ -30,7 +30,10 @@ PREFIX='legacy_review_receipt:'
 ROUTINE={'CANDIDATE_ANALYSIS','RECONNECT_BACKOFF','CONNECTIVITY_RECOVERED',
          'CONNECTIVITY_HALT_RECOVERED','OPENING_EQUIVALENT_HEALTH_PASSED',
          'SESSION_ENTRY_CUTOFF_LATCHED','SESSION_LIQUIDATION_DUE','SESSION_CLOSED'}
-READS={'get_accounts','get_portfolio','get_equity_positions','get_equity_orders'}
+# Reuse the broker capability allowlist; order preflight belongs to intent
+# investigation, not this flat-read-only maintenance workflow.
+from .broker import READ_TOOLS
+READS=READ_TOOLS-{'review_equity_order'}
 
 
 def digest(value):
@@ -111,10 +114,49 @@ def _flat_reconciliation(data,event_at,config):
     if not 0<=age<=config['connectivity']['account_max_age_seconds']:raise Unsafe('Stale/future retained reconciliation')
 
 
+def controlled_restarts(db,rows,config):
+    """Adjudicate a complete controlled flat lifecycle, never a crash/stall.
+
+    A shutdown flag alone is insufficient: bind the prior generation, new
+    supervisor, flat startup, different worker generation and prompt full read.
+    Every row still goes through interval identity and broker-history checks.
+    """
+    accepted=set();findings=[]
+    for i,(eid,at,kind,text) in enumerate(rows):
+        if kind!='WORKER_STOP':continue
+        d=json.loads(text)
+        if d.get('controlled') is not True or d.get('open_positions')!=0 or d.get('unresolved_orders')!=0:
+            raise Unsafe('Uncontrolled or nonflat worker stop')
+        prior=db.execute("SELECT data FROM events WHERE id<? AND kind='PERSISTENT_WORKER_START' ORDER BY id DESC LIMIT 1",(eid,)).fetchone()
+        previous=json.loads(prior[0]) if prior else {}
+        if not d.get('generation') or (d.get('generation'),d.get('pid'))!=(previous.get('generation'),previous.get('pid')):
+            raise Unsafe('Controlled stop generation unproven')
+        lifecycle=rows[i+1:i+4]
+        if [r[2] for r in lifecycle]!=['SUPERVISOR_START','RESTART_RECOVERY','PERSISTENT_WORKER_START']:
+            raise Unsafe('Incomplete controlled deployment lifecycle')
+        supervisor,recovery,worker=[json.loads(r[3]) for r in lifecycle]
+        if (supervisor.get('architecture')!='persistent-v2' or not supervisor.get('pid') or
+            recovery.get('open_positions')!=0 or recovery.get('pending')!=0 or recovery.get('failure_class')!='WORKER_PROCESS_FAILURE' or
+            worker.get('supervisor_pid')!=supervisor['pid'] or not worker.get('generation') or
+            worker['generation']==d['generation'] or not worker.get('pid') or worker['pid']==d['pid']):
+            raise Unsafe('Controlled startup identity/flatness unproven')
+        before=db.execute("SELECT id,at FROM events WHERE id<? AND kind='RECONCILIATION' ORDER BY id DESC LIMIT 1",(eid,)).fetchone()
+        after=next((r for r in rows[i+4:] if r[2]=='RECONCILIATION'),None)
+        if (not before or not after or
+            not 0<=(dt(at)-dt(before[1])).total_seconds()<=config['connectivity']['idle_poll_seconds']+config['watchdog']['cycle_deadline_seconds'] or
+            not 0<=(dt(after[1])-dt(at)).total_seconds()<=config['watchdog']['startup_timeout_seconds'] or
+            not dt(at)<=dt(worker['started_at'])<=dt(after[1])):
+            raise Unsafe('Controlled restart reconciliation stale or missing')
+        covered=[eid]+[r[0] for r in lifecycle];accepted.update(covered)
+        findings.append(dict(events=covered,before_event=before[0],after_event=after[0],old_generation=d['generation'],new_generation=worker['generation']))
+    return accepted,findings
+
+
 def investigate_interval(root,db,anchor,end,now):
     """Cover every row, require complete flat reads before/after each failure."""
     from .legacy_recovery import KEY
     config=C.load(root);rows=_rows(db,anchor['watermark'],end)
+    lifecycle_ids,lifecycles=controlled_restarts(db,rows,config)
     prior=db.execute("SELECT id,at,kind,data FROM events WHERE id<=? AND kind='RECONCILIATION' ORDER BY id DESC LIMIT 1",(anchor['watermark'],)).fetchone()
     before=list(prior) if prior else None
     if before is None:raise Unsafe('No initial broker reconciliation')
@@ -152,11 +194,13 @@ def investigate_interval(root,db,anchor,end,now):
             rid=data.get('id') if kind=='LEGACY_SUCCESSOR_REVIEWED' else data.get('successor_id')
             stored=kv(db,PREFIX+str(rid))
             if not stored or (kind=='LEGACY_SUCCESSOR_REVIEWED' and stored!=data):raise Unsafe('Unbound review lifecycle event')
+        elif eid in lifecycle_ids:pass  # Already proven complete and flat, not a generic whitelist.
         elif kind not in ROUTINE:raise Unsafe('Unexplained intervening event: '+kind)
     if unresolved:raise Unsafe('Read outage has no complete subsequent reconciliation')
-    if not findings:raise Unsafe('No supported intervening read incident to investigate')
+    # Empty/read-only intervals may be reinvestigated after expiration; they
+    # never authorize reuse of the expired receipt.
     return dict(start_exclusive=anchor['watermark'],end_inclusive=end,row_count=len(rows),
-                interval_digest=digest(rows),order_history_digest=orders_digest,event_kind_counts=dict(Counter(r[2] for r in rows)),resolved_reads=findings)
+                interval_digest=digest(rows),order_history_digest=orders_digest,event_kind_counts=dict(Counter(r[2] for r in rows)),resolved_reads=findings,controlled_restarts=lifecycles)
 
 
 def valid_successor(root,db,record,now):
@@ -214,7 +258,8 @@ async def successor(root,previous_id,*,investigated=False,now=None):
             parent=active_review(ledger.db);anchor=ledger.get(KEY);config=C.assert_current(root,ledger)
             if not parent or parent.get('id')!=previous_id or parent.get('status')!='REVIEWED':raise Unsafe('Exact unconsumed predecessor required')
             if ledger.get('legacy_review_status:'+parent['id']):raise Unsafe('Consumed predecessor')
-            if not dt(parent['at'])<=clock()<dt(parent['expires_at']):raise Unsafe('Predecessor expired or future')
+            if not dt(parent['at'])<=clock():raise Unsafe('Predecessor future')
+            if not dt(parent['at'])<dt(parent['expires_at']):raise Unsafe('Malformed predecessor lifetime')
             if valid_review(root,ledger.db,parent,clock()):raise Unsafe('Current review remains valid; no successor needed')
             target=hold_identity(runtime)
             if target!=parent['target'] or target!=anchor['target']:raise Unsafe('Hold changed')
@@ -236,9 +281,11 @@ async def successor(root,previous_id,*,investigated=False,now=None):
                 if code_identity(root)!=build:raise Unsafe('Code changed during investigation')
                 end=ledger.db.execute('SELECT COALESCE(MAX(id),0) FROM events').fetchone()[0]
                 interval=investigate_interval(root,ledger.db,anchor,end,clock())
+                if interval['controlled_restarts'] and interval['controlled_restarts'][-1]['new_generation']!=second.get('generation'):
+                    raise Unsafe('Current worker differs from investigated restart')
                 if any(proof.get('broker',{}).get('order_history_digest')!=interval['order_history_digest'] for proof in (first,second)):
                     raise Unsafe('Fresh broker order history differs from investigated interval')
-                created=clock();expires=min(dt(parent['expires_at']),next_session(config,created).open)
+                created=clock();expires=next_session(config,created).open
                 if not created<expires:raise Unsafe('Investigation expired before commit')
                 rid=str(uuid.uuid4());record=dict(version=VERSION,id=rid,status='REVIEWED',at=iso(created),expires_at=iso(expires),
                     target=target,parent_id=parent['id'],parent=parent,parent_digest=digest(parent),anchor_digest=digest(anchor),
