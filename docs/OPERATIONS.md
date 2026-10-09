@@ -67,3 +67,65 @@ Worker startup allowance is 45 seconds; heartbeat stale threshold 15 seconds; wo
 ## Publication checklist
 
 This repository may not yet have Git initialized. No initialization, remote, commit or push is implicit. Run `python ops/repository_check.py` to inspect the proposed publishable files. Inspect `.gitignore`, `git status --short` and `git diff --cached` yourself before a first publication. If private files were ever tracked, ignoring them is insufficient: remove them from the index/history as appropriate and rotate exposed credentials. Do not print tokens while diagnosing.
+
+
+## Disarmed diagnostic code replacement: independent maintenance host proof
+
+The older supervisor releases its sleep assertion when LIVE is disabled, the
+account is flat and the session is closed. Requiring that same supervisor's
+assertion before replacing it deadlocks maintenance. Do not restore LIVE or
+write a fake host-health record to bootstrap replacement.
+
+A tested candidate may provide `trader.maintenance_host.guarded_replacement`.
+Run the deployment controller from that exact clean, privately verified
+candidate, with the production root passed explicitly and the existing
+`configuration.lock` held throughout. This helper is only for flat, disarmed
+maintenance with an unchanged historical hold. It grants no entry authority.
+
+Prerequisites remain: exact passing test/audit evidence and private commit;
+pinned authenticated account; fresh read-only broker/local reconciliation;
+zero positions, working orders, unresolved/ambiguous intents; healthy database;
+applied configuration/strategy identity; persistent LIVE false; READ_ONLY and
+MAINTENANCE present; no conflicting STOP/TRANSITION/LIQUIDATE. Verify old
+worker/watchdog ownership and heartbeat independently before stopping them.
+
+The controller creates its own supported macOS assertion with
+`/usr/bin/caffeinate -is -w <controller-pid> -t 900`. The macOS caffeinate manual
+specifies idle/system sleep assertions, an owner-exit lifetime and a timeout;
+system-sleep protection requires AC. Both actual pmset assertion types, their
+child PID, Created-for PID and OS parent PID are verified. AC, lid-open,
+battery, fresh observations and the unchanged strict clock bound must pass.
+No claim is made to prevent clamshell sleep. This proof is scoped to maintenance
+and never replaces the ordinary watchdog's host-health file or entry checks.
+
+Use the helper's ordered callbacks for the established controlled procedure:
+
+1. Fresh build, read-only broker, database and service preflight.
+2. `launchctl bootout gui/<uid>/com.local.intraday-paper`; wait for verified
+   controlled flat WORKER_STOP and both old processes to exit. Never replace
+   code while the old worker remains or shutdown is uncertain.
+3. Repeat fresh read-only broker/database checks while stopped.
+4. Install the exact tested commit detached, preserving runtime/database,
+   controls, counters, history, configuration and existing LaunchAgent plist.
+5. Bootstrap the unchanged LaunchAgent. Verify exactly one new owned worker,
+   service-context authentication/reconciliation and the expected installed code.
+6. Require fresh ordinary watchdog-owned host/clock/sleep certification before
+   releasing the maintenance assertion. Verify that certification again after
+   handoff. The new disarmed diagnostic supervisor must own its own assertion.
+
+The helper verifies fresh physical/clock evidence and unchanged safety binding
+around every lifecycle action. The caller must provide real broker/build and
+service proofs; the helper cannot manufacture them. It stops on a failed
+prerequisite without executing later callbacks. A separate exclusive maintenance
+lock prevents competing assertion controllers. The assertion is released by
+finally/SIGTERM/SIGINT cleanup, owner death, or the 900-second maximum lifetime.
+Fifteen minutes bounds stop/start, the existing five-minute stability observation
+and certification; it is not an extension of any trading freshness threshold.
+Expiry, sleep, lid close, AC loss or assertion-owner loss aborts certification.
+A failed replacement may leave the flat service stopped; retain all disarmed
+controls and report the exact stage rather than restarting through uncertainty.
+
+Never clear KILL, acknowledge a review, reset recovery budgets, restore LIVE,
+remove maintenance or mutate broker orders as part of this workflow. Record the
+before/after commit, physical proof, assertion owner/handoff/cleanup, read-only
+broker proof and preservation hashes in a protected ignored report.
