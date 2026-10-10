@@ -32,7 +32,8 @@ A successor requires all of the following:
 
 - Explicit new investigation attestation and exact predecessor ID.
 - Same bindable legacy KILL instance, original incident evidence, account,
-  configuration, and strategy; no expired or consumed predecessor.
+  configuration, and strategy; no consumed predecessor. An expired predecessor
+  is archival evidence only and requires a complete new investigation.
 - Every ledger row from the original review watermark through the final locked
   transaction is present, chronological, and included in the digest.
 - Every safety event is explained. The narrow supported cases are positively
@@ -46,7 +47,8 @@ A successor requires all of the following:
   heartbeat, watchdog, host/AC/sleep/clock, matching config/strategy, and no
   conflicting control. Fresh order history must match the investigated interval.
 - A clean committed build, bound to the receipt. A code change invalidates it.
-- Original expiry is retained or shortened to the next opening, never extended.
+- Each new receipt expires at the next opening after its own complete investigation.
+  The predecessor expiry and immutable contents are never edited or reused as authority.
 
 Unknown events, mutations, mismatches, positions, working/partial orders, changed
 hold/account/config/strategy, database failures, worker restarts or unknown worker
@@ -69,7 +71,7 @@ No timeout, freshness, clock, host, or risk threshold is increased.
 ## Supported workflow
 
 After separate authorized deployment of a clean tested build, an authorized
-operator can explicitly investigate a still-unexpired predecessor:
+operator can explicitly reinvestigate an invalid or expired, unconsumed predecessor:
 
 ```
 python -m trader legacy-incident successor --review-id PREDECESSOR_ID --investigation-complete
@@ -81,8 +83,31 @@ is a separate `legacy-incident acknowledge` operation requiring explicit
 operator authorization, exact current receipt ID, and fresh proof. No command
 in this document grants authorization to execute it.
 
-Expired receipts, incomplete history, and unsupported incidents fail closed;
+Expired receipts cannot authorize acknowledgment. Incomplete history and unsupported incidents fail closed;
 there is no automatic renewal. Retained snapshots cannot prove continuously
 observed broker truth between polls. The full ledger, stable order history, fresh
 reads, and explicit investigation are the evidence boundary, not a claim that
 unobserved external activity is impossible.
+
+
+## Exhausted episodes and authority boundaries
+
+Both the stored cumulative counter and preserved-generation ledger records veto
+review/acknowledgment. A missing newer counter does not mean zero historical
+failures. The larger count is used without summing overlapping representations,
+and an unresolved preserved failure or malformed counter fails closed. No
+counter, event, hold or receipt is reset. Normal readiness uses the same veto.
+
+Generic `production activate --recover-kill` cannot adjudicate legacy text or
+replace the dedicated incident workflow. Explicit activation is not forensic
+review authority. It also cannot release hard/operator-required or mismatched
+structured state, and rechecks budget/provenance immediately before a permitted
+transition. Ordinary activation's broker/data/risk/host prerequisites remain.
+
+There is **no implemented disposition/reset workflow for an exhausted legacy
+incident with missing historical evidence**. Documentation saying "operator
+investigation required" is not such an API. Designing a new prospective episode
+would require independently reviewed policy, immutable disposition evidence,
+explicit authorization and fresh proof; it cannot manufacture a pre-outage
+snapshot, remove the old incident or simply reset the counter. This implementation
+adds no such path and does not make an ineligible incident eligible.

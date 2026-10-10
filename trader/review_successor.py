@@ -19,7 +19,7 @@ from .doctor import kv
 from .models import UTC,Unsafe,dt,iso
 import sqlite3
 from .persistent.db import Ledger
-from .persistent.system_recovery import hold_lock,HARD_FAILURES
+from .persistent.system_recovery import hold_lock,HARD_FAILURES,require_recovery_budget
 from .risk import TERMINAL
 from .readiness import order_history_digest
 from .store import process_lock
@@ -223,8 +223,7 @@ def valid_successor(root,db,record,now):
         if record['code_identity']!=code_identity(root):return False
         interval=record['interval']
         if digest(_rows(db,interval['start_exclusive'],interval['end_inclusive']))!=interval['interval_digest']:return False
-        budget=kv(db,'system_recovery_budget',{})
-        if budget.get('failures',0)>=config['watchdog']['restart_limit']:return False
+        require_recovery_budget(db,config)
         if db.execute('PRAGMA quick_check').fetchone()[0]!='ok':return False
         witnessed=False
         for at,kind,data in db.execute('SELECT at,kind,data FROM events WHERE id>? ORDER BY id',(record['watermark'],)):
@@ -267,7 +266,7 @@ async def successor(root,previous_id,*,investigated=False,now=None):
                 parent['account_binding']!=account_binding(ledger.get('account_number'),parent['id'])):raise Unsafe('Predecessor identity binding changed')
             if evidence_digest(ledger.db,anchor['event_ids'])!=anchor['evidence_digest']:raise Unsafe('Original incident evidence changed')
             build=code_identity(root)
-            if ledger.get('system_recovery_budget',{}).get('failures',0)>=config['watchdog']['restart_limit']:raise Unsafe('Recovery budget exhausted')
+            require_recovery_budget(ledger.db,config)
             # Reject unknown/hard intervals before touching the broker.
             end=ledger.db.execute('SELECT COALESCE(MAX(id),0) FROM events').fetchone()[0]
             investigate_interval(root,ledger.db,anchor,end,clock())

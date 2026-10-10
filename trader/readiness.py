@@ -88,9 +88,12 @@ async def control_snapshot(root, *, now=None, broker_check=True):
             check('ac_power',host.get('ac_power') is True)
             result['controls']=[name for name in ('KILL','MAINTENANCE','STOP','TRANSITION','LIQUIDATE','READ_ONLY','ENTRIES_DISABLED') if (r/name).exists()]
             check('no_other_control',not set(result['controls'])-{'KILL'})
-            from .persistent.system_recovery import preserved_failure_evidence
+            from .persistent.system_recovery import preserved_failure_evidence,require_recovery_budget
             preserved=preserved_failure_evidence(db);result['preserved_failure_budget']=preserved
-            check('restart_budget','KILL' not in result['controls'] or preserved['failures']<config['watchdog']['restart_limit'])
+            try:
+                if 'KILL' in result['controls']:require_recovery_budget(db,config)
+                check('restart_budget',True)
+            except (Unsafe,ValueError,TypeError,KeyError):check('restart_budget',False)
             result['current_health']=kv(db,'health',{})
             # Only a safe subset; no account, order identifiers or exception text.
             result['current_health']={k:result['current_health'].get(k) for k in ('at','auth','reconciled','data_healthy')}

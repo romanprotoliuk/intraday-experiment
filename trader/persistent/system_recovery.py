@@ -288,6 +288,26 @@ def preserved_failure_evidence(db):
     return dict(failures=len(generations),event_ids=event_ids,unresolved=pending is not None)
 
 
+def require_recovery_budget(db, config):
+    """Read-only budget veto at operator/review authority boundaries.
+
+    Legacy preservation records may be the only durable counter. Never treat a
+    missing newer KV counter as proof that no failures occurred. The two views
+    can describe the same failures, so use the larger count, never sum/reset.
+    This supplies no disposition, reset, receipt or hold-clear authority.
+    """
+    row=db.execute("SELECT value FROM kv WHERE key='system_recovery_budget'").fetchone()
+    stored=json.loads(row[0]) if row else {}
+    if not isinstance(stored,dict):raise Unsafe('Malformed recovery budget')
+    count=stored.get('failures',0)
+    if type(count) is not int or count<0:raise Unsafe('Malformed recovery budget')
+    preserved=preserved_failure_evidence(db)
+    limit=config['watchdog']['restart_limit']
+    if preserved['unresolved'] or max(count,preserved['failures'])>=limit:
+        raise Unsafe('Recovery budget exhausted or unresolved; independent incident disposition required')
+    return dict(stored_failures=count,preserved_failures=preserved['failures'],limit=limit)
+
+
 def restart_permitted(runtime, ledger):
     """Stop flat crash loops after the cumulative budget; retain position monitoring.
 

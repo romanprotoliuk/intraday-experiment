@@ -19,7 +19,7 @@ from .host_health import require_host
 from .models import UTC, Unsafe, dt, iso
 from .store import process_lock, atomic_text
 from .persistent.db import Ledger
-from .persistent.system_recovery import hold_lock, read_hold, AUTOMATIC, HARD_FAILURES, BLOCKS
+from .persistent.system_recovery import hold_lock, read_hold, AUTOMATIC, HARD_FAILURES, BLOCKS, require_recovery_budget
 
 TARGET='Worker exited; reconciliation/recovery required'
 KEY='legacy_incident_review'
@@ -79,8 +79,7 @@ def valid_review(root,db,record,now):
         if record['account_binding']!=account_binding(kv(db,'account_number'),record['id']):return False
         if record['evidence_digest']!=evidence_digest(db,record['event_ids']):return False
         if db.execute('PRAGMA quick_check').fetchone()[0]!='ok':return False
-        budget=kv(db,'system_recovery_budget',{})
-        if budget.get('failures',0)>=config['watchdog']['restart_limit']:return False
+        require_recovery_budget(db,config)
         for kind,data in db.execute('SELECT kind,data FROM events WHERE id>? ORDER BY id',(record['watermark'],)):
             d=json.loads(data)
             if kind in CHANGING_EVENTS:return False
@@ -151,6 +150,7 @@ def require_control_proof(root,ledger,proof,clock,transition_text=None):
     required={'platform','config_permissions','runtime_permissions','database','configuration','strategy','risk','local_flat','ownership','worker_stable','quiet_period','heartbeat','watchdog','processes','launchagent','host_clock','ac_power','broker','worker_auth'}
     if not all(proof.get('checks',{}).get(k) is True for k in required):raise Unsafe('Control-plane proof incomplete')
     config=C.assert_current(root,ledger)
+    require_recovery_budget(ledger.db,config)
     if C.path(root).stat().st_mode&0o077 or (Path(root)/'runtime').stat().st_mode&0o077:
         raise Unsafe('Protected configuration/runtime permissions changed')
     if not 0<=(now-dt(proof['broker']['observed_at'])).total_seconds()<=config['execution']['preflight_max_age_seconds']:raise Unsafe('Broker proof stale')

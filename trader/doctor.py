@@ -121,16 +121,20 @@ def display(result,json_output=False):
 def kill_recovery(root,result):
     p=Path(root)/'runtime/KILL'
     if not p.exists():return
-    reason=p.read_text()
-    from .persistent.system_recovery import read_hold, HARD_FAILURES
+    from .persistent.system_recovery import read_hold, HARD_FAILURES, AUTOMATIC, require_recovery_budget
     structured=read_hold(Path(root)/'runtime')
-    if structured:
-        if structured.get('reason_code') not in ('WATCHDOG_STALL','READ_TRANSPORT_EXIT','CYCLE_DEADLINE','RESTART_BUDGET_EXHAUSTED') or structured.get('failure_class') in HARD_FAILURES:
-            raise Unsafe('Structured KILL requires manual investigation')
-    elif not any(x in reason for x in ('Worker exited','Watchdog stalled worker','Monitoring cycle deadline exceeded','Watchdog restart budget exhausted')):
-        raise Unsafe('KILL cause is not an automatically recoverable watchdog condition; manual audit required')
+    if structured is None:
+        raise Unsafe('Legacy/unknown KILL requires the dedicated investigated incident workflow; reason text is not recovery authority')
+    if (structured.get('reason_code') not in AUTOMATIC or structured.get('failure_class') in HARD_FAILURES
+            or structured.get('operator_required') is not False or structured.get('automatic_candidate') is not True
+            or structured.get('mutation_in_flight') is not False or structured.get('positions_at_failure')!=0
+            or structured.get('unresolved_at_failure')!=0
+            or structured.get('failures',999)>=structured.get('failure_limit',0)):
+        raise Unsafe('Structured KILL requires independent operator investigation')
     db=read_db(root)
     try:
+        require_recovery_budget(db,C.load(root))
+        if kv(db,'system_hold')!=structured:raise Unsafe('Structured hold/ledger mismatch')
         row=db.execute("select at,data from events where kind='PERSISTENT_WORKER_START' order by id desc limit 1").fetchone()
         if not row or (datetime.now(UTC)-dt(row['at'])).total_seconds()<300 or json.loads(row['data'])['pid']!=result['heartbeat']['pid']:raise Unsafe('KILL recovery requires same healthy worker for at least five minutes')
         session=db.execute('SELECT data FROM sessions WHERE day=?',(datetime.now(NY).date().isoformat(),)).fetchone()
@@ -171,6 +175,7 @@ async def transition(root,activate=False,acknowledge=False,recover_kill=False):
                     if ledger.trades() or ledger.orders():raise Unsafe('Ledger changed during transition')
                     kill_now=(r/'KILL').read_text() if (r/'KILL').exists() else None
                     if kill_now!=kill_before:raise Unsafe('KILL changed during operator transition')
+                    if kill_now is not None:kill_recovery(root,verified)
                     ledger.event(datetime.now(UTC),'PRODUCTION_TRANSITION',dict(config_fingerprint=C.fingerprint(current),kill_reason=kill_now))
                     for name in ('KILL','MAINTENANCE','READ_ONLY'):(r/name).unlink(missing_ok=True)
                     values=ledger.get('settings');values['live_enabled']=True;ledger.put('settings',values)

@@ -31,7 +31,7 @@ These commands are documented for a later deliberate operator action. Installati
 
 Inspect the report. Mandatory configuration, pinned-account reconciliation, flat positions/orders, clock/host/sleep, stable connectivity, fresh market data, current-session opening health, watchdog/heartbeat and risk capacity must pass. Only the explicit operator holds may remain. If a genuine gate fails, stop here. A prior MISSED ORB remains disqualified even if all infrastructure checks pass.
 
-For an existing watchdog-origin KILL, audit its reason and retained events. Recovery requires the same healthy worker for at least five minutes plus the mandatory current checks. An unknown/operator emergency KILL is not automatically cleared. Resolve its cause through a separately audited repair; do not relabel the marker to trick recovery.
+For an existing watchdog-origin KILL, audit its structured provenance and retained events. Legacy KILL must use the dedicated investigated-legacy workflow; matching reason text is never sufficient, and activation cannot replace that workflow. Exhausted/hard incidents remain operator-required with no generic reset path. Recovery requires the same healthy worker for at least five minutes plus the mandatory current checks. An unknown/operator emergency KILL is not automatically cleared. Resolve its cause through a separately audited repair; do not relabel the marker to trick recovery.
 
 The single controlled transition is:
 
